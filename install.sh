@@ -38,7 +38,7 @@ EOF
 chmod 755 /etc/init.d/solr
 
 #Build Storm Project and Copy to working folder
-cd DeviceManagerDemo/DeviceMonitor
+cd DeviceMonitor
 mvn clean package 
 cp target/DeviceMonitor-0.0.1-SNAPSHOT.jar /home/storm
 
