@@ -3,7 +3,11 @@
   <groupId>com.hortonworks.iot.cometd</groupId>
   <artifactId>Cometd</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-<dependencies>	
+  <properties>
+		<docker.registry.name></docker.registry.name>
+		<docker.repository.name>${docker.registry.name}vvaks/cometd</docker.repository.name>
+  </properties>
+  <dependencies>	
 	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-core</artifactId>
@@ -60,6 +64,14 @@
     </resources>
     <outputDirectory>classes/</outputDirectory>
     <plugins>
+    	<plugin>
+        	<artifactId>maven-compiler-plugin</artifactId>
+        	<version>3.5.1</version>
+        	<configuration>
+          		<source>1.7</source>
+          		<target>1.7</target>
+        	</configuration>
+  		</plugin>
 		<plugin>
     		<artifactId>maven-assembly-plugin</artifactId>
     		<configuration>
@@ -81,6 +93,36 @@
 				</execution>
 			</executions>
   		</plugin>
+  		<plugin>
+		<groupId>org.jolokia</groupId>
+		<artifactId>docker-maven-plugin</artifactId>
+		<version>0.13.3</version>
+		<configuration>
+		<images>
+			<image>
+				<!-- <alias>${project.artifactId}</alias>
+				<name>${docker.repository.name}:${project.version}</name> -->
+				<alias>cometd</alias>
+				<name>${docker.repository.name}</name>
+				<build>
+					<from>java:8-jre</from>
+					<maintainer>vvaks</maintainer>
+					<assembly>
+						<descriptor>docker-assembly.xml</descriptor>
+					</assembly>
+					<ports>
+						<port>8091</port>
+					</ports>
+					<cmd>
+						<shell>java -jar \
+							/maven/Cometd-jar-with-dependencies.jar server \
+							/maven/docker-config.yml</shell>
+					</cmd>
+				</build>
+			</image>
+		</images>
+	</configuration>
+	</plugin>
     </plugins>
   </build>
 </project>

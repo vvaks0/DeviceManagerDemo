@@ -24,6 +24,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.hortonworks.iot.rest.TechnicianService;
 import com.hortonworks.iot.simulator.events.ProgramGuide;
 import com.hortonworks.iot.simulator.events.Station;
+import com.hortonworks.iot.simulator.types.BioReactorSimulator;
+import com.hortonworks.iot.simulator.types.FiltrationSystemSimulator;
 import com.hortonworks.iot.simulator.types.STBSimulator;
 import com.hortonworks.iot.simulator.types.TechnicianSimulator;
 import com.hortonworks.iot.simulator.types.X1TunerSimulator;
@@ -48,6 +50,12 @@ public class Simulator {
     		config = new ResourceConfig(TechnicianService.class);
     	}
     	else if(simType.equalsIgnoreCase("Technician")){
+    		config = new ResourceConfig(TechnicianService.class);
+    	}
+    	else if(simType.equalsIgnoreCase("BioReactor")){
+    		config = new ResourceConfig(TechnicianService.class);
+    	}
+    	else if(simType.equalsIgnoreCase("FiltrationSystem")){
     		config = new ResourceConfig(TechnicianService.class);
     	}
     	else{
@@ -92,7 +100,25 @@ public class Simulator {
 			break;
 		case "STB 3000":
 			deviceNetworkInfoMap.put("port", "8089");
-			break;	
+			break;
+		case "BioReactor 1000":
+			deviceNetworkInfoMap.put("port", "8085");
+			break;
+		case "BioReactor 2000":
+			deviceNetworkInfoMap.put("port", "8087");
+			break;
+		case "BioReactor 3000":
+			deviceNetworkInfoMap.put("port", "8089");
+			break;
+		case "FiltrationSystem 1000":
+			deviceNetworkInfoMap.put("port", "8070");
+			break;
+		case "FiltrationSystem 2000":
+			deviceNetworkInfoMap.put("port", "8071");
+			break;
+		case "FiltrationSystem 3000":
+			deviceNetworkInfoMap.put("port", "8072");
+			break;
 		default:
 			System.out.println("There is no record of " + simType + " " + deviceId + ". Cannot start device simulation");
 			System.exit(1);
@@ -159,6 +185,33 @@ public class Simulator {
 					techThread.start();
 				}
 			}
+        }
+		else if(simType.equalsIgnoreCase("BioReactor")){			
+			System.out.println("Starting Webservice...");
+			final HttpServer server = startServer(simType, serialNumber);
+			server.start();
+			System.out.println("Starting BioReactor Fermentation Process...");
+			Map networkInfo = getNetworkInfo(serialNumber, simType);
+			ipaddress =  (String)networkInfo.get("ipaddress");
+			port =  (String)networkInfo.get("port");
+			//BioReactorSimulator bioReactor = new BioReactorSimulator(serialNumber, ipaddress, port);
+			BioReactorSimulator bioReactor = new BioReactorSimulator(serialNumber, mode);
+			deviceThread = new Thread(bioReactor);
+			deviceThread.setName("BioReactor: " + serialNumber);
+			deviceThread.start();
+        }else if(simType.equalsIgnoreCase("FiltrationSystem")){			
+			System.out.println("Starting Webservice...");
+			final HttpServer server = startServer(simType, serialNumber);
+			server.start();
+			System.out.println("Starting Filtration Process...");
+			Map networkInfo = getNetworkInfo(serialNumber, simType);
+			ipaddress =  (String)networkInfo.get("ipaddress");
+			port =  (String)networkInfo.get("port");
+			//BioReactorSimulator bioReactor = new BioReactorSimulator(serialNumber, ipaddress, port);
+			FiltrationSystemSimulator filtartionSystem = new FiltrationSystemSimulator(serialNumber, mode);
+			deviceThread = new Thread(filtartionSystem);
+			deviceThread.setName("Filtration System: " + serialNumber);
+			deviceThread.start();
         }
     }
 	

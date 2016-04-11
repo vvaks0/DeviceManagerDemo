@@ -34,6 +34,11 @@ public class Main {
 		createChannel(bayeux, "/technicianstatus");
 		createChannel(bayeux, "/alert");
 		createChannel(bayeux, "/prediction");
+		createChannel(bayeux, "/fraudAlert");
+		createChannel(bayeux, "/incomingTransactions");
+		createChannel(bayeux, "/accountStatusUpdate");
+		createChannel(bayeux, "/bioReactorStatus");
+		createChannel(bayeux, "/filtrationStatus");
 		//final ServerChannel channel = bayeux.getChannel("");
 		
 		server.join();
