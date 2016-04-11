@@ -58,8 +58,8 @@ public class MapUI extends HttpServlet {
     }
     
     public void testPubSub() {
-    	String pubSubUrl = "http://localhost:8091/cometd";
-    	String techChannel = "/technicianstatus";
+    	String pubSubUrl = "http://sandbox.hortonworks.com:8091/cometd";
+    	String deviceChannel = "/devicestatus";
     	HttpClient httpClient = new HttpClient();
 		try {
 			httpClient.start();
@@ -84,7 +84,7 @@ public class MapUI extends HttpServlet {
 			System.out.println("Could not connect to Cometd Http PubSub Platform");
 		}
 		
-		bayuexClient.getChannel(techChannel).publish("TEST");
+		bayuexClient.getChannel(deviceChannel).publish("TEST");
     }
     
     public String convertPOJOToJSON(Object pojo) {
