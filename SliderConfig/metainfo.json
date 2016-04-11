@@ -1,0 +1,32 @@
+{
+"schemaVersion": "2.1",
+"application": {
+        "name": "MAPUI",
+        "components": [
+            {
+                "name": "MAPUI",
+                "type": "docker",
+                "dockerContainers": [
+                    {
+                        "name": "mapui",
+                        "commandPath": "/usr/bin/docker",
+                        "image": "vvaks/mapui",
+                        "ports": [{"containerPort" : "8090"}]
+                    }
+                ]
+            },
+	    {
+                "name": "COMETD",
+                "type": "docker",
+                "dockerContainers": [
+                    {
+                        "name": "cometd",
+                        "commandPath": "/usr/bin/docker",
+                        "image": "vvaks/cometd",
+                        "ports": [{"containerPort" : "8091"}]
+                    }
+                ]
+            }
+	]
+    }
+}

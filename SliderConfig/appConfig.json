@@ -1,0 +1,17 @@
+{
+    "schema": "http://example.org/specification/v2.0.0",
+    "metadata": {},
+    "global": {},
+    "components": {
+            "MAPUI": {
+                "mapui.commandPath": "/usr/bin/docker", 
+                "mapui.options":"-d --net=host",
+                "mapui.statusCommand":"docker inspect -f {{.State.Running}} ${CONTAINER_ID} | grep true"
+            },
+	    "COMETD": {
+                "cometd.commandPath": "/usr/bin/docker",
+                "cometd.options":"-d --net=host",
+                "cometd.statusCommand":"docker inspect -f {{.State.Running}} ${CONTAINER_ID} | grep true"
+            }
+    }
+}
