@@ -7,6 +7,8 @@
   <description>Project for MapUI</description>
   <packaging>jar</packaging>
    <properties>
+   		<docker.registry.name></docker.registry.name>
+		<docker.repository.name>${docker.registry.name}vvaks/mapui</docker.repository.name>
     	<tomcat.version>7.0.57</tomcat.version>
   </properties>
   <dependencies>
@@ -163,6 +165,36 @@
           		<finalName>MapUI</finalName>                   
         	</configuration>
       	</plugin>
+      	<plugin>
+		<groupId>org.jolokia</groupId>
+		<artifactId>docker-maven-plugin</artifactId>
+		<version>0.13.3</version>
+		<configuration>
+		<images>
+			<image>
+				<!-- <alias>${project.artifactId}</alias>
+				<name>${docker.repository.name}:${project.version}</name> -->
+				<alias>mapui</alias>
+				<name>${docker.repository.name}</name>
+				<build>
+					<from>java:8-jre</from>
+					<maintainer>vvaks</maintainer>
+					<assembly>
+						<descriptor>docker-assembly.xml</descriptor>
+					</assembly>
+					<ports>
+						<port>8090</port>
+					</ports>
+					<cmd>
+						<shell>java -jar \
+							/maven/MapUI-jar-with-dependencies.jar server \
+							/maven/docker-config.yml</shell>
+					</cmd>
+				</build>
+			</image>
+		</images>
+	</configuration>
+	</plugin>
     </plugins>
   </build>
 </project>
