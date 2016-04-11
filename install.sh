@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Copy binaries and files to required folders
+#Create SOLR service script
 mv /etc/init.d/solr /etc/init.d/solr_bak
 tee /etc/init.d/solr <<-'EOF'
 #!/bin/sh
@@ -37,6 +37,8 @@ esac
 EOF
 chmod 755 /etc/init.d/solr
 
+#Copy binaries and files to required folders
+
 #Build Storm Project and Copy to working folder
 cd DeviceMonitor
 mvn clean package 
@@ -55,17 +57,17 @@ chmod -R 755 /opt/incubator-zeppelin/notebook/
 
 #Import Spark Model
 cd ../Model
-unzip nostradamusSVMModel.zip
-cp nostradamusSVMModel /tmp/
-cp DeviceLogTrainingData.csv /tmp/
+unzip -vf nostradamusSVMModel.zip
+cp -rvf nostradamusSVMModel /tmp
+cp -vf DeviceLogTrainingData.csv /tmp
 sudo -u hdfs hadoop fs -chmod 777 /demo/data/
 hadoop fs -mkdir /demo/data/model/
 hadoop fs -mkdir /demo/data/checkpoint
 hadoop fs -mkdir /demo/data/training/
 hadoop fs -put /tmp/nostradamusSVMModel /demo/data/model/ 
 hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
-rm -Rf /tmp/nostradamusSVMModel
-rm -f /tmp/DeviceLogTrainingData.csv
+rm -Rvf /tmp/nostradamusSVMModel
+rm -vf /tmp/DeviceLogTrainingData.csv
 
 #Configure Kafka
 /usr/hdp/current/kafka-broker/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic TechnicianEvent
