@@ -85,7 +85,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", "localhost");
+		config.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
 		config.set("hbase.zookeeper.property.clientPort", "2181");
 		config.set("zookeeper.znode.parent", "/hbase-unsecure");
 		

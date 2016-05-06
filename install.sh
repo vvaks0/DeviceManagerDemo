@@ -277,7 +277,7 @@ cd ..
 
 HBASESTATUS=$(curl -u admin:admin -X GET http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/HBASE | grep '"state" :' | grep -Po '([A-Z]+)')
 if [ "$HBASESTATUS" == INSTALLED ]; then
-	echo "Starting  Hbase Service..."
+	echo "*********************************Starting  Hbase Service..."
 	TASKID=$(curl -u admin:admin -i -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"context" :"Start Hbase via REST"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "STARTED"}}}' http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/HBASE | grep "id" | grep -Po '([0-9]+)')
 	echo "HBASE TaskId " $TASKID
 	sleep 2
@@ -340,7 +340,7 @@ done
 
 # Deploy Storm Topology
 echo "*********************************Deploying Storm Topology..."
-storm jar /home/storm/VaccineManufacturingMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.pharma.topology.VaccineManufacturingMonitorTopology
+storm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.pharma.topology.torm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.topology.DeviceMonitorTopology
 
 echo "*********************************Downloading Docker Images for UI..."
 # Download Docker Images
