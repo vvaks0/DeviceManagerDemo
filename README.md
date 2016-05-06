@@ -1,81 +1,76 @@
 # DeviceManagerDemo
-The Device Manager Demo is designed to demonstrate a fully functioning modern Data/IoT application. It is a Lambda architecture built using the Hortonworks Data Platform and Hortonworks Data Flow. The demo shows how a Telecom can manage customer device outages using predictive maintenance and a connected workforce.
+The Device Manager Demo is designed to demonstrate a fully functioning modern Data/IoT application. 
+It is a Lambda architecture built using the Hortonworks Data Platform and Hortonworks Data Flow. 
+The demo shows how a Telecom can manage customer device outages using predictive maintenance and a connected workforce.
 
-Download and Import Hortonworks Sandbox 2.3.2 for Virtual Box. Should work with VMWare but has not been tested.
-Modify local hosts file so that sandbox.hortonworks.com resolves to 127.0.0.1 (This is important and may break the simulator and UI)
-Start Sandbox, SSH to Sandbox, Change sandbox root password
+# Install DeviceManagerDemo
+Download and Import Hortonworks Sandbox 2.4 for Virtual Box. 
 
-From Ambari (http://sandbox.hortonworks.com:8080)
- 
-- Start Kafka (This is important, if Kafka is not started, the install script will not be able to configure the required Kafka Topics)
+Should work with VMWare but has not been tested. 
 
-ssh to sandbox as root into /root directory  
-
-git clone https://github.com/vakshorton/DeviceManagerDemo.git (make sure that git cloned to /root/DeviceManagerDemo)
-
-cd DeviceManagerDemo
-
-chmod 755 install.sh
-
-./install.sh
-
-Reboot Sandbox
+Modify local hosts file so that sandbox.hortonworks.com resolves to 127.0.0.1 (This is important and may break the simulator and UI) 
 
 Configure Virtual Box Port Forward
 
 8082 – HDF_HTTP_Ingest
 
-8090 - MapUI
+8090 - BiologicsManufacturingUI
 
 8091 - Cometd
 
 9090 – HDF_Studio
 
-From Ambari Admin 
+Start Sandbox, SSH to Sandbox (ssh root@sandbox.hortonworks.com -p 2222)
 
- - start Nifi, Hbase, Kafka, Storm
+Wait for Sandbox to fully boot up, all service need to finish starting
 
-From the NiFi Studio interface (http://sandbox.hortonworks.com:9090/nifi), Import DeviceManageDemo.xml as a template into Nifi (The template is in the NifiFlow floder. Nifi allows you to browse the local machine so it may be easier to download a copy locally directly from git)
+Change Ambari password to "admin" (ambari-admin-password-reset)
+ 
+(!!!!!!!!!!!!!AMBARI PASSWORD MUST BE SET TO "admin" (no quotes)!!!!!!)
 
-Make sure to start all of the processors, should just need to hit the green start button as all of the processors will be selected after import
+cd /root (use the /root directory to begin the install)
 
-Make sure that docker is running: service docker status. If not, start it: service docker start (This is important as the UI is launched by Slider as a docker container)
+git clone https://github.com/vakshorton/DeviceManagerDemo.git
 
-Start Application Servers on Slider:
+(make sure that git cloned to /root/DeviceManagerDemo)
 
-slider create mapui --template /usr/hdp/docker/dockerbuild/mapui/appConfig.json --metainfo /usr/hdp/docker/dockerbuild/mapui/metainfo.json --resources /usr/hdp/docker/dockerbuild/mapui/resources.json
+cd DeviceManagerDemo
 
-(Slider will download the docker containers from the docker hub so it may take a few minutes for the application server to start)
+./install.sh
 
-Deploy Storm Topology:
+Install script reboot once complete. This is required to refresh session configuration.
 
-storm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.topology.DeviceMonitorTopology
+Wait for Sandbox to fully reboot
 
-Start Spark Nostradamus:
+Log back in via SSH (ssh root@sandbox.hortonworks.com -p 2222)
 
-spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+# Start Demo
+The script to start demo services should be located in the /root/DeviceManagerDemo directory
 
+./startDemoServices.sh
 
-Build Simulator inside of Sandbox 
+Slider will download the servlet (UI) docker containers from the docker hub so it may take a few minutes for the application server to start
 
-cd /root/DeviceManagerDemo/DeviceSimulator
+Bring up the UI in a Browser: http://sandbox.hortonworks.com:8090/ShopFloorUI/DeviceMap
 
-mvn clean package
+Start Simulation:
 
-scp target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar to the local machine
+The Simulator should be located in the BiologicsManufacturingDemo directory
 
-Start Simulation on Host (Not inside VM):
+java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar Technician 1000 Simulation
+
+java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar STB 1000 Simulation
+
 USAGE:
 
-java -jar simulator.jar arg1=Simulator-Type{STB,Technician,X1Simulator} arg2=EntityId arg3={Simulation|Training} Only for X1 Simulator(arg4={Number of threads per market}
+java -jar simulator.jar arg1=Simulator-Type{BioReactor|FiltrationSystem} arg2=EntityId{1000} arg3={Simulation|Training}
 
-Set Top Box
+Example:
 
-java -jar {PATH_TO_SIMULATOR.JAR}/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar "STB” "1000" "Simulation"
+java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar Technician 1000 Simulation
 
-Technician
-java -jar {PATH_TO_SIMULATOR.JAR}/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar “Technician” "1000" “Simulation"
+java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar STB 1000 Simulation
 
-X1 Simulator
+# MAP UI
 
-java -jar {PATH_TO_SIMULATOR.JAR}//DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar “X1Tuner” "1000" “Simulation” 10
+
