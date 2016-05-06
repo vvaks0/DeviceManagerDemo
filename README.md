@@ -14,7 +14,7 @@ Configure Virtual Box Port Forward
 
 8082 – HDF_HTTP_Ingest
 
-8090 - BiologicsManufacturingUI
+8090 - MapUI
 
 8091 - Cometd
 
