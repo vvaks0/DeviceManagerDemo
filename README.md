@@ -55,7 +55,7 @@ Bring up the UI in a Browser: http://sandbox.hortonworks.com:8090/MapUI/DeviceMa
 
 Start Simulation:
 
-The Simulator should be located in the BiologicsManufacturingDemo directory
+The Simulator should be located in the DeviceManagerDemo directory
 
 java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar Technician 1000 Simulation
 
