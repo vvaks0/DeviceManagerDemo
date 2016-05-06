@@ -19,12 +19,6 @@ chmod 755 install.sh
 
 ./install.sh
 
-From Ambari
-
- - Increase Yarn memory per container to at least 5GB (This is important as the default setting of 2GB is not enough to support the application servers on Yarn)
- 
-- Install Nifi using Add Service button
-
 Reboot Sandbox
 
 Configure Virtual Box Port Forward
