@@ -358,7 +358,7 @@ EOF
 chmod 755 /etc/init.d/solr
 
 #Import Spark Model
-cd ../Model
+cd Model
 unzip -vf nostradamusSVMModel.zip
 cp -rvf nostradamusSVMModel /tmp
 cp -vf DeviceLogTrainingData.csv /tmp
