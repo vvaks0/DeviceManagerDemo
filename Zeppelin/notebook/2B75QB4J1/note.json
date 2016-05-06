@@ -1,0 +1,83 @@
+{
+  "paragraphs": [
+    {
+      "text": "%dep\nz.load(\"org.apache.spark:spark-streaming-kafka_2.10:1.5.2\")",
+      "dateUpdated": "Dec 16, 2015 10:48:58 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1450305854262_-641518226",
+      "id": "20151216-224414_1407033887",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "res0: org.apache.zeppelin.spark.dep.Dependency \u003d org.apache.zeppelin.spark.dep.Dependency@299aef85\n"
+      },
+      "dateCreated": "Dec 16, 2015 10:44:14 PM",
+      "dateStarted": "Dec 16, 2015 10:48:58 PM",
+      "dateFinished": "Dec 16, 2015 10:49:37 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "import org.apache.spark.streaming.kafka._\n \nval kafkaStream \u003d KafkaUtils.createStream(streamingContext, \"localhost:2181\", [consumer group id], [per-topic number of Kafka partitions to consume])",
+      "dateUpdated": "Dec 16, 2015 10:52:37 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1450305904843_828699266",
+      "id": "20151216-224504_2103656662",
+      "dateCreated": "Dec 16, 2015 10:45:04 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Device Management Spark Streaming",
+  "id": "2B75QB4J1",
+  "angularObjects": {
+    "2B9EDS7RX": [],
+    "2B8V224NM": [],
+    "2B5YUQKT8": [],
+    "2B8JH2674": [],
+    "2B8AE3SQC": [],
+    "2B8RDV9CU": [],
+    "2B6XJD72P": [],
+    "2B889XZ5W": [],
+    "2B5SJ7RSF": [],
+    "2B8WH294Q": [],
+    "2B7K5YMG2": [],
+    "2B7Y9ZUR6": [],
+    "2B5Y3SDHE": [],
+    "2B8B5C112": []
+  },
+  "config": {},
+  "info": {}
+}
