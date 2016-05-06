@@ -202,7 +202,7 @@ cd ..
 
 echo "*********************************Building Spark Topology"
 #Build Spark Project and Copy to working folder
-cd ../DeviceMonitorNostradamus
+cd DeviceMonitorNostradamus
 mvn clean package
 cp target/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
 cd ..
@@ -269,11 +269,39 @@ mkdir /home/docker/dockerbuild/
 mkdir /home/docker/dockerbuild/mapui
 
 #Copy Slider configurations to working folder
-cd ../SliderConfig
+cd SliderConfig
 cp -vf appConfig.json /home/docker/dockerbuild/mapui
 cp -vf metainfo.json /home/docker/dockerbuild/mapui
 cp -vf resources.json /home/docker/dockerbuild/mapui
 cd ..
+
+HBASESTATUS=$(curl -u admin:admin -X GET http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/HBASE | grep '"state" :' | grep -Po '([A-Z]+)')
+if [ "$HBASESTATUS" == INSTALLED ]; then
+	echo "Starting  Hbase Service..."
+	TASKID=$(curl -u admin:admin -i -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"context" :"Start Hbase via REST"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "STARTED"}}}' http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/HBASE | grep "id" | grep -Po '([0-9]+)')
+	echo "HBASE TaskId " $TASKID
+	sleep 2
+
+	LOOPESCAPE="false"
+
+	until [ "$LOOPESCAPE" == true ]; do
+
+		TASKSTATUS=$(curl -u admin:admin -X GET http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/requests/$TASKID | grep "request_status" | grep -Po '([A-Z]+)')
+		if [ "$TASKSTATUS" == COMPLETED ]; then
+			LOOPESCAPE="true"
+ 		fi
+
+		echo "Task Status" $TASKSTATUS
+		sleep 2
+	done
+	echo "Hbase Service Started..."
+
+elif [ "$HBASESTATUS" == STARTED ]; then
+	echo "Hbase Service  Started..."
+else
+	echo "Hbase Service in a transition state. Wait for process to complete and then run the install script again."
+	exit 1
+fi
 
 STORMSTATUS=$(curl -u admin:admin -X GET http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/STORM | grep '"state" :' | grep -Po '([A-Z]+)')
 if [ "$STORMSTATUS" == INSTALLED ]; then
@@ -359,7 +387,7 @@ chmod 755 /etc/init.d/solr
 
 #Import Spark Model
 cd Model
-unzip -vf nostradamusSVMModel.zip
+unzip nostradamusSVMModel.zip
 cp -rvf nostradamusSVMModel /tmp
 cp -vf DeviceLogTrainingData.csv /tmp
 sudo -u hdfs hadoop fs -chmod 777 /demo/data/

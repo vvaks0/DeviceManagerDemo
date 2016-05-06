@@ -61,7 +61,6 @@ fi
 
 sleep 1
 #Start HBASE
-: <<'COMMENT'
 HBASESTATUS=$(curl -u admin:admin -X GET http://sandbox.hortonworks.com:8080/api/v1/clusters/Sandbox/services/HBASE | grep '"state" :' | grep -Po '([A-Z]+)')
 if [ "$HBASESTATUS" == INSTALLED ]; then
 	echo "Starting  Hbase Service..."
@@ -89,7 +88,6 @@ else
 	echo "Hbase Service in a transition state. Wait for process to complete and then run the install script again."
 	exit 1
 fi
-COMMENT
 
 sleep 1
 # Start Storm
@@ -128,3 +126,4 @@ service docker start
 # Start UI servlet on Yarn using Slider
 slider create mapui --template /home/docker/dockerbuild/mapui/appConfig.json --metainfo /home/docker/dockerbuild/mapui/metainfo.json --resources /home/docker/dockerbuild/mapui/resources.json
 # yarn application -kill $(yarn application -list | grep -Po '(application_[0-9]+_[0-9]+)\s(biologicsmanufacturingui)' | grep -Po '(application_[0-9]+_[0-9]+)')
+spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar
