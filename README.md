@@ -72,5 +72,6 @@ java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar Technician 10
 java -jar DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar STB 1000 Simulation
 
 # MAP UI
+![Alt text](/screenshot/DeviceManagerScreenShot.png "MapUI")
 
 
