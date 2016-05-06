@@ -51,7 +51,7 @@ The script to start demo services should be located in the /root/DeviceManagerDe
 
 Slider will download the servlet (UI) docker containers from the docker hub so it may take a few minutes for the application server to start
 
-Bring up the UI in a Browser: http://sandbox.hortonworks.com:8090/ShopFloorUI/DeviceMap
+Bring up the UI in a Browser: http://sandbox.hortonworks.com:8090/MapUI/DeviceMap
 
 Start Simulation:
 
