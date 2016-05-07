@@ -8,21 +8,6 @@ body {
     padding: 0;
 }
 
-.header1{
-	background:-o-linear-gradient(bottom, #415866 5%, #415866 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ff0000), color-stop(1, #415866) );
-	background:-moz-linear-gradient( center top, #415866 5%, #415866 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#ff0000", endColorstr="#415866");	background: -o-linear-gradient(top,#415866,bf5f00);
-
-	background-color:#ff0000;
-	border:0px solid #000000;
-	text-align:center;
-	border-width:0px 0px 1px 1px;
-	font-size:14px;
-	font-family:Arial;
-	font-weight:bold;
-	color:#ffffff;
-}
-
 .header{
 	padding-top: 10px;
     padding-bottom: 10px;
@@ -30,8 +15,7 @@ body {
     position: relative;
     height: 70px;
     background-color: #333;
-    border-bottom: 1px solid #76BD1D;
-    box-shadow: 5px 5px 5px #76bd1d;
+    border-bottom: 5px solid #3FAB2A;
 }
 
 #brandingLayout {
@@ -276,12 +260,12 @@ div#command{
  
 <body onload="loadMap()">
 <div class="header">
-	<div id="brandingLayout">
-                <a class="brandingContent">
-                    <img src="images/hortonworks-logo-green.png"/>
-                    <span class="brandTitle" data-i18n="BRAND_TITLE"> DATAFLOW DEMO</span>
+		<div id="brandingLayout">
+                <a class="brandingContent" href="CustomerOverview?requestType=customerOverview">
+                    <img src="images/hortonworks-logo-new.png" width="200px"/>
+                    <span class="brandTitle" data-i18n="BRAND_TITLE"></span>
                 </a>
-	</div>
+		</div>
 </div>
 <div id="bodyContainer">
 	<div id="mapcontainer"></div>
