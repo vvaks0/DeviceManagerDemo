@@ -1,5 +1,7 @@
 package com.hortonworks.iot.cometd;
 
+import java.util.Map;
+
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerChannel;
@@ -12,7 +14,15 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		// Configure Jetty
-		Server server = new Server(8091);
+		Integer cometdListenPort = 8091;
+		Map<String, String> env = System.getenv();
+        System.out.println("********************** ENV: " + env);
+		if(env.get("COMETD_PORT") != null){
+        	cometdListenPort = Integer.valueOf((String)env.get("COMETD_PORT"));
+        }
+		
+		System.out.println("********************** Cometd Port: " + cometdListenPort);
+		Server server = new Server(cometdListenPort);
 		
 		ServletContextHandler webAppContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         webAppContext.setContextPath("/");
