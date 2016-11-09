@@ -526,10 +526,11 @@ cd $ROOT_PATH/Model
 unzip nostradamusSVMModel.zip
 cp -rvf nostradamusSVMModel /tmp
 cp -vf DeviceLogTrainingData.csv /tmp
-hadoop fs -chmod 777 /demo/data/
+hadoop fs -mkdir /demo/
 hadoop fs -mkdir /demo/data/model/
 hadoop fs -mkdir /demo/data/checkpoint
 hadoop fs -mkdir /demo/data/training/
+hadoop fs -chmod -R 777 /demo/data/
 hadoop fs -put /tmp/nostradamusSVMModel /demo/data/model/ 
 hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
 rm -Rvf /tmp/nostradamusSVMModel
