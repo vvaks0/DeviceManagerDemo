@@ -141,14 +141,16 @@ div#command{
 }
 
 </style>
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${mapAPIKey}"></script>
 <script src="//ajax.googleapis.com/ajax/libs/dojo/1.7.8/dojo/dojo.js"></script>
 <script type="text/javascript">
   dojo.require("dojo.io.script");
   dojo.require("dojox.cometd");
   dojo.require("dojox.cometd.longPollTransport");
   
-  var pubSubUrl = "http://localhost:8091/cometd"; 
+  var cometdHost = "${cometdHost}";
+  var cometdPort = "${cometdPort}";
+  var pubSubUrl = "http://" + cometdHost + ":" + cometdPort + "/cometd"; 
   var deviceChannel = "/devicestatus";
   var technicianChannel = "/technicianstatus";
   var alertChannel = "/alert";
