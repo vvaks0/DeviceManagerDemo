@@ -1,6 +1,7 @@
 package com.hortonworks.util;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -54,6 +55,15 @@ public class TechnicianEventJSONScheme implements KeyValueScheme {
         return new Values(technicianStatus);
 	}
 	
+	public List<Object> deserializeKeyAndValue(ByteBuffer arg0, ByteBuffer arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public List<Object> deserialize(ByteBuffer arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     public Fields getOutputFields() {
         return new Fields("TechnicianStatus");
     }

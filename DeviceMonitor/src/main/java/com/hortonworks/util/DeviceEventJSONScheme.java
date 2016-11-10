@@ -1,6 +1,7 @@
 package com.hortonworks.util;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -40,10 +41,6 @@ public class DeviceEventJSONScheme implements KeyValueScheme {
         return new Values(stbStatus);
     }
 
-    public Fields getOutputFields() {
-        return new Fields("DeviceStatus");
-    }
-
 	public List<Object> deserializeKeyAndValue(byte[] key, byte[] value) {
 		String eventJSONString = new String(value, UTF8);
         STBStatus stbStatus = null;
@@ -60,4 +57,17 @@ public class DeviceEventJSONScheme implements KeyValueScheme {
 		}
         return new Values(stbStatus);
 	}
+
+	public List<Object> deserializeKeyAndValue(ByteBuffer arg0, ByteBuffer arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public List<Object> deserialize(ByteBuffer arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Fields getOutputFields() {
+        return new Fields("DeviceStatus");
+    }
 }
