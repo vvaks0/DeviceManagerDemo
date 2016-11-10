@@ -497,22 +497,28 @@ cp -vf resources.json /home/docker/dockerbuild/mapui
 echo "*********************************Staging Slider Configurations..."
 
 # Build from source
-echo "*********************************Building Credit Card Transaction Monitor Storm Topology"
-cd $ROOT_PATH/DeviceMonitor-0.0.1-SNAPSHOT
+echo "*********************************Building Device Monitor Storm Topology..."
+cd $ROOT_PATH/DeviceMonitor
 mvn clean package
-cp -vf target/DeviceMonitor-0.0.1-SNAPSHOT /home/storm
+cp -vf target/DeviceMonitor-0.0.1-SNAPSHOT.jar /home/storm
+
+echo "*********************************Building Device Monitor Nostradamus Application..."
+#Build Spark Project and Copy to working folder
+cd $ROOT_PATH/DeviceMonitorNostradamus
+mvn clean package
+cp target/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
+cd $ROOT_PATH
 
 #Build Device Simulator from source
 echo "*********************************Building Simulator"
-cd $ROOT_PATH
 git clone https://github.com/vakshorton/DataSimulators.git
-cd DataSimulators/DeviceSimulator
+cd $ROOT_PATH/DataSimulators/DeviceSimulator
 mvn clean package
-cp -vf target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ROOT_PATH$ROOT_PATH
+cp -vf target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar 
+cd $ROOT_PATH
 
 # Build from source
 echo "*********************************Building Nifi Atlas Reporter"
-cd $ROOT_PATH
 git clone https://github.com/vakshorton/NifiAtlasBridge.git
 cd $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask
 mvn clean install
