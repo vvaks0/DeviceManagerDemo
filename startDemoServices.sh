@@ -356,6 +356,9 @@ storm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.topol
 sleep 5
 startNifiFlowReporter
 
+echo "*********************************Deploying Spark Streaming Application..."
+nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar >> DeviceMonitorNostradamus.log &
+
 echo "*********************************Deploying Application Container to..."
 # Ensure docker service is running
 service docker start
@@ -373,6 +376,6 @@ docker run -d -e MAP_API_KEY=$MAP_API_KEY -e ZK_HOST=$ZK_HOST -e COMETD_HOST=$CO
 
 echo "*********************************Wait 20 seconds for Application to Initialize..."
 sleep 20
-echo "*********************************Access the UI at http://$AMBARI_HOST:8090/MapUI/DeviceMap
+echo "*********************************Access the UI at http://$AMBARI_HOST:8090/MapUI/DeviceMap"
 
 exit 0
