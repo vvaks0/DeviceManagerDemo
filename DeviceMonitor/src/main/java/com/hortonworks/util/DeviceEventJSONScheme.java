@@ -13,12 +13,13 @@ import com.hortonworks.events.STBStatus;
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import storm.kafka.KeyValueScheme;
 
 /**
  * Encodes a byte array into a single UTF-8 string. Very useful for testing and passing raw JSON messages around without
  * proper deserialization.
  */
-public class DeviceEventJSONScheme implements Scheme {
+public class DeviceEventJSONScheme implements KeyValueScheme {
 	private static final long serialVersionUID = 1L;
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -42,4 +43,21 @@ public class DeviceEventJSONScheme implements Scheme {
     public Fields getOutputFields() {
         return new Fields("DeviceStatus");
     }
+
+	public List<Object> deserializeKeyAndValue(byte[] key, byte[] value) {
+		String eventJSONString = new String(value, UTF8);
+        STBStatus stbStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+			stbStatus = mapper.readValue(eventJSONString, STBStatus.class);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return new Values(stbStatus);
+	}
 }

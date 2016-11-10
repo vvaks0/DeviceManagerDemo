@@ -13,8 +13,9 @@ import com.hortonworks.events.TechnicianStatus;
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import storm.kafka.KeyValueScheme;
 
-public class TechnicianEventJSONScheme implements Scheme {
+public class TechnicianEventJSONScheme implements KeyValueScheme {
 
 	private static final long serialVersionUID = 1L;
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -36,6 +37,23 @@ public class TechnicianEventJSONScheme implements Scheme {
         return new Values(technicianStatus);
     }
 
+	public List<Object> deserializeKeyAndValue(byte[] key, byte[] value) {
+		String eventJSONString = new String(value, UTF8);
+        TechnicianStatus technicianStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+			technicianStatus = mapper.readValue(eventJSONString, TechnicianStatus.class);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return new Values(technicianStatus);
+	}
+	
     public Fields getOutputFields() {
         return new Fields("TechnicianStatus");
     }
