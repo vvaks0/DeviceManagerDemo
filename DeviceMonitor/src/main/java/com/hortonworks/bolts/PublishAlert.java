@@ -24,7 +24,7 @@ public class PublishAlert extends BaseRichBolt {
 	private String alertChannel;
 	private BayeuxClient bayuexClient;
 	private OutputCollector collector;
-	private Constants constants = new Constants();
+	private Constants constants;
 	
 	public void execute(Tuple tuple) {
 		DeviceAlert deviceAlert = (DeviceAlert) tuple.getValueByField("DeviceAlert");
@@ -43,6 +43,7 @@ public class PublishAlert extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		this.constants = new Constants();
 		pubSubUrl = constants.getPubSubUrl();
 		alertChannel = constants.getAlertChannel();
 		

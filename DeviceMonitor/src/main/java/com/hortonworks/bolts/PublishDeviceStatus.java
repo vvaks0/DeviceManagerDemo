@@ -25,7 +25,7 @@ public class PublishDeviceStatus extends BaseRichBolt {
 	private String deviceChannel;
 	private BayeuxClient bayuexClient;
 	private OutputCollector collector;
-	private Constants constants = new Constants();
+	private Constants constants;
 	
 	public void execute(Tuple tuple) {
 		STBStatus deviceStatus = (STBStatus) tuple.getValueByField("DeviceStatus");
@@ -47,6 +47,7 @@ public class PublishDeviceStatus extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		this.constants = new Constants();
 		pubSubUrl = constants.getPubSubUrl();
 		deviceChannel = constants.getDeviceChannel();
 		
