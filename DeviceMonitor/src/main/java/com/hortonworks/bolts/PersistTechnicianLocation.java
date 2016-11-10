@@ -1,6 +1,7 @@
 package com.hortonworks.bolts;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -31,14 +32,15 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
+	private Constants constants = new Constants();
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
 		TechnicianStatus technicianStatus = (TechnicianStatus) tuple.getValueByField("TechnicianStatus");
 		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", Constants.zkHost);
-		config.set("hbase.zookeeper.property.clientPort", Constants.zkPort);
-		config.set("zookeeper.znode.parent", "/hbase-unsecure");
+		config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 
 	    HTable table = null;
 		try {
@@ -72,9 +74,9 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
 		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", Constants.zkHost);
-		config.set("hbase.zookeeper.property.clientPort", Constants.zkPort);
-		config.set("zookeeper.znode.parent", "/hbase-unsecure");
+		config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 		
 		String tableName = "TechnicianEvents";
 	    HTable table = null;

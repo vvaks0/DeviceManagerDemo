@@ -27,6 +27,7 @@ import com.hortonworks.bolts.PublishDeviceStatus;
 import com.hortonworks.bolts.PublishTechnicianLocation;
 import com.hortonworks.bolts.RecommendTechnician;
 import com.hortonworks.bolts.RouteTechnician;
+
 import com.hortonworks.spouts.DeviceSpout;
 import com.hortonworks.util.Constants;
 import com.hortonworks.util.DeviceEventJSONScheme;
@@ -45,6 +46,7 @@ import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import storm.kafka.BrokerHosts;
 import storm.kafka.KafkaSpout;
+import storm.kafka.KeyValueSchemeAsMultiScheme;
 import storm.kafka.SpoutConfig;
 import storm.kafka.StringScheme;
 import storm.kafka.ZkHosts;
@@ -52,7 +54,7 @@ import storm.kafka.ZkHosts;
 public class DeviceMonitorTopology {        
     public static void main(String[] args) {
      TopologyBuilder builder = new TopologyBuilder();
-        
+     Constants constants = new Constants();   
      // Use pipe as record boundary
   	  RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter(",");
 
@@ -63,40 +65,55 @@ public class DeviceMonitorTopology {
   	  FileRotationPolicy rotationPolicy = new FileSizeRotationPolicy(5.0f, Units.MB);
 
   	  // Use default, Storm-generated file names
-  	  FileNameFormat deviceLogFileNameFormat = new DefaultFileNameFormat().withPath(Constants.hivePath);
+  	  FileNameFormat deviceLogFileNameFormat = new DefaultFileNameFormat().withPath(constants.getHivePath());
   	  HdfsBolt deviceLogHdfsBolt = new HdfsBolt()
-  		     .withFsUrl(Constants.nameNode)
+  		     .withFsUrl(constants.getNameNodeUrl())
   		     .withFileNameFormat(deviceLogFileNameFormat)
   		     .withRecordFormat(format)
   		     .withRotationPolicy(rotationPolicy)
   		     .withSyncPolicy(syncPolicy);
-       
+  	System.out.println("********************** Starting Topology.......");
+  	System.out.println("********************** Name Node Url: " + constants.getNameNodeUrl());
+  	System.out.println("********************** Zookeeper Host: " + constants.getZkHost());
+    System.out.println("********************** Zookeeper Port: " + constants.getZkPort());
+    System.out.println("********************** Zookeeper ConnString: " + constants.getZkConnString());
+    System.out.println("********************** Zookeeper Kafka Path: " + constants.getZkKafkaPath());
+    System.out.println("********************** Zookeeper HBase Path: " + constants.getZkHBasePath());
+    System.out.println("********************** Atlas Host: " + constants.getAtlasHost());
+    System.out.println("********************** Atlas Port: " + constants.getAtlasPort());
+    System.out.println("********************** Metastore URI: " + constants.getHiveMetaStoreURI());
+    System.out.println("********************** Cometd URI: " + constants.getPubSubUrl());
+  	  
       Config conf = new Config(); 
-      BrokerHosts hosts = new ZkHosts(Constants.zkConnString);
+      //BrokerHosts hosts = new ZkHosts(Constants.zkConnString);
+      BrokerHosts hosts = new ZkHosts(constants.getZkConnString(), constants.getZkKafkaPath());
       
-      SpoutConfig deviceKafkaSpoutConfig = new SpoutConfig(hosts, Constants.deviceTopicName, "/" + Constants.deviceTopicName, UUID.randomUUID().toString());
+      SpoutConfig deviceKafkaSpoutConfig = new SpoutConfig(hosts, constants.getDeviceEventsTopicName(), constants.getZkKafkaPath(), UUID.randomUUID().toString());
       deviceKafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new DeviceEventJSONScheme());
+      deviceKafkaSpoutConfig.ignoreZkOffsets = true;
       deviceKafkaSpoutConfig.useStartOffsetTimeIfOffsetOutOfRange = true;
       deviceKafkaSpoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
       KafkaSpout deviceKafkaSpout = new KafkaSpout(deviceKafkaSpoutConfig); 
      
-      SpoutConfig technicianKafkaSpoutConfig = new SpoutConfig(hosts, Constants.technicianTopicName, "/" + Constants.technicianTopicName, UUID.randomUUID().toString());
+      SpoutConfig technicianKafkaSpoutConfig = new SpoutConfig(hosts, constants.getTechnicianEventsTopicName(), constants.getZkKafkaPath(), UUID.randomUUID().toString());
       technicianKafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new TechnicianEventJSONScheme());
+      technicianKafkaSpoutConfig.ignoreZkOffsets = true;
       technicianKafkaSpoutConfig.useStartOffsetTimeIfOffsetOutOfRange = true;
       technicianKafkaSpoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
       KafkaSpout technicianKafkaSpout = new KafkaSpout(technicianKafkaSpoutConfig);
+      
+      Map<String, Object> hbConf = new HashMap<String, Object>();
+      hbConf.put("hbase.rootdir", constants.getNameNodeUrl() + constants.getHbasePath());
+      hbConf.put("hbase.zookeeper.quorum", constants.getZkHost());
+	  hbConf.put("hbase.zookeeper.property.clientPort", constants.getZkPort());
+      hbConf.put("zookeeper.znode.parent", constants.getZkHBasePath());
+      conf.put("hbase.conf", hbConf);
+      conf.put("hbase.rootdir", constants.getNameNodeUrl() + constants.getHbasePath());
       
       SimpleHBaseMapper technicianLocationMapper = new SimpleHBaseMapper()
               .withRowKeyField("TechnicianId")
               .withColumnFields(new Fields("TechnicianStatus","Latitude","Longitude"))
               .withColumnFamily("cf");
-      
-      Map<String, Object> hbConf = new HashMap<String, Object>();
-      hbConf.put("hbase.rootdir", Constants.nameNode + "/apps/hbase/data/");
-      hbConf.put("hbase.zookeeper.quorum", Constants.zkHost);
-	  hbConf.put("hbase.zookeeper.property.clientPort", Constants.zkPort);
-      hbConf.put("zookeeper.znode.parent", "/hbase-unsecure");
-      conf.put("hbase.conf", hbConf);
       
       //HBaseBolt hbasePersistTechnicianLocation = new HBaseBolt("TechnicianEvents", technicianLocationMapper).withConfigKey("hbase.conf");
       

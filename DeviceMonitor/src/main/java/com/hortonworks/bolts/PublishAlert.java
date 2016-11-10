@@ -20,10 +20,11 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
 public class PublishAlert extends BaseRichBolt {
-	private String pubSubUrl = Constants.pubSubUrl;
-	private String alertChannel = Constants.alertChannel;
+	private String pubSubUrl;
+	private String alertChannel;
 	private BayeuxClient bayuexClient;
 	private OutputCollector collector;
+	private Constants constants = new Constants();
 	
 	public void execute(Tuple tuple) {
 		DeviceAlert deviceAlert = (DeviceAlert) tuple.getValueByField("DeviceAlert");
@@ -42,6 +43,8 @@ public class PublishAlert extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		pubSubUrl = constants.getPubSubUrl();
+		alertChannel = constants.getAlertChannel();
 		
 		HttpClient httpClient = new HttpClient();
 		try {

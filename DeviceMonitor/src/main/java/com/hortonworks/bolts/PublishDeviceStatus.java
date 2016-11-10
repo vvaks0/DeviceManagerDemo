@@ -21,10 +21,11 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
 public class PublishDeviceStatus extends BaseRichBolt {
-	private String pubSubUrl = Constants.pubSubUrl;
-	private String deviceChannel = Constants.deviceChannel;
+	private String pubSubUrl;
+	private String deviceChannel;
 	private BayeuxClient bayuexClient;
 	private OutputCollector collector;
+	private Constants constants = new Constants();
 	
 	public void execute(Tuple tuple) {
 		STBStatus deviceStatus = (STBStatus) tuple.getValueByField("DeviceStatus");
@@ -46,6 +47,8 @@ public class PublishDeviceStatus extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		pubSubUrl = constants.getPubSubUrl();
+		deviceChannel = constants.getDeviceChannel();
 		
 		HttpClient httpClient = new HttpClient();
 		try {
