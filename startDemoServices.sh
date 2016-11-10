@@ -3,6 +3,8 @@
 export AMBARI_HOST=$(hostname -f)
 echo "*********************************AMABRI HOST IS: $AMBARI_HOST"
 
+export ROOT_PATH=$(pwd)
+
 serviceExists () {
        	SERVICE=$1
        	SERVICE_STATUS=$(curl -u admin:admin -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/$SERVICE | grep '"status" : ' | grep -Po '([0-9]+)')
@@ -357,7 +359,7 @@ sleep 5
 startNifiFlowReporter
 
 echo "*********************************Deploying Spark Streaming Application..."
-nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar >> DeviceMonitorNostradamus.log &
+nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar >> $ROOT_PATH/DeviceMonitorNostradamus.log &
 
 echo "*********************************Deploying Application Container to..."
 # Ensure docker service is running
