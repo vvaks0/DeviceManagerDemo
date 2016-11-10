@@ -36,7 +36,6 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
-		this.constants = new Constants();
 		TechnicianStatus technicianStatus = (TechnicianStatus) tuple.getValueByField("TechnicianStatus");
 		Configuration config = HBaseConfiguration.create();
 		config.set("hbase.zookeeper.quorum", constants.getZkHost());
@@ -74,6 +73,7 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		this.constants = new Constants();
 		Configuration config = HBaseConfiguration.create();
 		config.set("hbase.zookeeper.quorum", constants.getZkHost());
 		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
