@@ -16,7 +16,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import storm.kafka.KeyValueScheme;
 
-public class TechnicianEventJSONScheme implements KeyValueScheme {
+public class TechnicianEventJSONScheme implements Scheme {
 
 	private static final long serialVersionUID = 1L;
 	private static final Charset UTF8 = Charset.forName("UTF-8");

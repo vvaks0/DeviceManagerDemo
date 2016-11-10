@@ -48,8 +48,8 @@ import storm.kafka.BrokerHosts;
 import storm.kafka.KafkaSpout;
 import storm.kafka.KeyValueSchemeAsMultiScheme;
 import storm.kafka.SpoutConfig;
-import storm.kafka.StringScheme;
 import storm.kafka.ZkHosts;
+
 
 public class DeviceMonitorTopology {        
     public static void main(String[] args) {
@@ -89,14 +89,14 @@ public class DeviceMonitorTopology {
       BrokerHosts hosts = new ZkHosts(constants.getZkConnString(), constants.getZkKafkaPath());
       
       SpoutConfig deviceKafkaSpoutConfig = new SpoutConfig(hosts, constants.getDeviceEventsTopicName(), constants.getZkKafkaPath(), UUID.randomUUID().toString());
-      deviceKafkaSpoutConfig.scheme = new KeyValueSchemeAsMultiScheme(new DeviceEventJSONScheme());
+      deviceKafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new DeviceEventJSONScheme());
       deviceKafkaSpoutConfig.ignoreZkOffsets = true;
       deviceKafkaSpoutConfig.useStartOffsetTimeIfOffsetOutOfRange = true;
       deviceKafkaSpoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
       KafkaSpout deviceKafkaSpout = new KafkaSpout(deviceKafkaSpoutConfig); 
      
       SpoutConfig technicianKafkaSpoutConfig = new SpoutConfig(hosts, constants.getTechnicianEventsTopicName(), constants.getZkKafkaPath(), UUID.randomUUID().toString());
-      technicianKafkaSpoutConfig.scheme = new KeyValueSchemeAsMultiScheme(new TechnicianEventJSONScheme());
+      technicianKafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new TechnicianEventJSONScheme());
       technicianKafkaSpoutConfig.ignoreZkOffsets = true;
       technicianKafkaSpoutConfig.useStartOffsetTimeIfOffsetOutOfRange = true;
       technicianKafkaSpoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
