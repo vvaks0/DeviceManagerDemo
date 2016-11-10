@@ -514,7 +514,7 @@ echo "*********************************Building Simulator"
 git clone https://github.com/vakshorton/DataSimulators.git
 cd $ROOT_PATH/DataSimulators/DeviceSimulator
 mvn clean package
-cp -vf target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar 
+cp -vf target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ROOT_PATH
 cd $ROOT_PATH
 
 # Build from source

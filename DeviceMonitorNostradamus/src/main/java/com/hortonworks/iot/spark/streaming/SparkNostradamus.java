@@ -38,23 +38,25 @@ import com.hortonworks.iot.util.Constants;
 import scala.Tuple2;
 
 public class SparkNostradamus {
+	private static Constants constants;
 	
 	public static void main(String[] args) {
+		constants = new Constants();
 		final Integer batchSize = 1;
-		final String pubSubUrl = Constants.pubSubUrl;
-		final String predictionChannel = Constants.predictionChannel;
+		final String pubSubUrl = constants.getPubSubUrl();
+		final String predictionChannel = constants.getPredictionChannel();
 		final String tempFailPredication = "Temperature pattern indicates imminent device failure. Contact customer or send technician";
 		
 		Map<String, Integer> kafkaTopics = new HashMap<String, Integer>();
-		kafkaTopics.put(Constants.deviceTopicName, 1);
+		kafkaTopics.put(constants.getDeviceTopicName(), 1);
 		SparkConf sparkConf = new SparkConf();//.setMaster("local[4]").setAppName("Nostradamus").set("spark.driver.allowMultipleContexts", "true");
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
-		jssc.checkpoint(Constants.sparkCheckpointPath);
-		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), Constants.sparkModelPath+"nostradamusSVMModel");
+		jssc.checkpoint(constants.getSparkCheckpointPath());
+		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
-		KafkaUtils.createStream(jssc, Constants.zkConnString,"spark-streaming-consumer-group", kafkaTopics);
+		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", kafkaTopics);
 				
 		//kafkaStream.print();
 		JavaPairDStream<String, String> deviceStream = kafkaStream;
