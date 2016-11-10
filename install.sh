@@ -533,6 +533,7 @@ unzip nostradamusSVMModel.zip
 cp -rvf nostradamusSVMModel /tmp
 cp -vf DeviceLogTrainingData.csv /tmp
 hadoop fs -mkdir /demo/
+hadoop fs -mkdir /demo/data
 hadoop fs -mkdir /demo/data/model/
 hadoop fs -mkdir /demo/data/checkpoint
 hadoop fs -mkdir /demo/data/training/
