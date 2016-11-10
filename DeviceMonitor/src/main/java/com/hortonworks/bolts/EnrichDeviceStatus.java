@@ -29,7 +29,7 @@ import backtype.storm.tuple.Values;
 public class EnrichDeviceStatus extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
-	private Constants constants = new Constants();
+	private Constants constants;
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
@@ -85,10 +85,11 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 	}
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
+		this.constants = new Constants();
 		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", "sandbox.hortonworks.com");
-		config.set("hbase.zookeeper.property.clientPort", "2181");
-		config.set("zookeeper.znode.parent", "/hbase-unsecure");
+		config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		config.set("zookeeper.znode.parent", constants.getHbasePath());
 		
 		String tableName = "DeviceDetails";
 	    HTable table = null;

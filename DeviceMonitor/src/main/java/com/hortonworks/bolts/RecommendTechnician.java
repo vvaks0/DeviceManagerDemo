@@ -26,10 +26,12 @@ import com.hortonworks.events.DeviceAlert;
 import com.hortonworks.events.DeviceStatus;
 import com.hortonworks.events.TechnicianDestination;
 import com.hortonworks.events.TechnicianStatus;
+import com.hortonworks.util.Constants;
 
 public class RecommendTechnician extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
+	private Constants constants;
 	
     public RecommendTechnician() {}
 
@@ -53,10 +55,11 @@ public class RecommendTechnician extends BaseRichBolt {
     	TechnicianStatus recommendedTechStatus = new TechnicianStatus();
     	ResultScanner techLocationScanner;
     	
-    	Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", "localhost");
-		config.set("hbase.zookeeper.property.clientPort", "2181");
-		config.set("zookeeper.znode.parent", "/hbase-unsecure");		
+    	this.constants = new Constants();
+		Configuration config = HBaseConfiguration.create();
+		config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		config.set("zookeeper.znode.parent", constants.getHbasePath());;		
 
 	    HTable table = null;
 		try {

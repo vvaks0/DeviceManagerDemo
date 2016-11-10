@@ -19,11 +19,13 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.hortonworks.events.TechnicianDestination;
+import com.hortonworks.util.Constants;
 
 public class RouteTechnician extends BaseRichBolt {
 	static final long serialVersionUID = 1L;
     private TechnicianDestination technicianDestination;
     private OutputCollector collector;
+    private Constants constants;
     
     public RouteTechnician() {
         super();
@@ -32,7 +34,7 @@ public class RouteTechnician extends BaseRichBolt {
 	public void execute(Tuple tuple) {
 		technicianDestination = (TechnicianDestination)tuple.getValueByField("TechnicianDestination");
 		try{
-        	URL url = new URL("http://localhost:8084/contentListener");
+        	URL url = new URL("http://" + constants.getNameNodeHost() +":8084/contentListener");
     		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     		conn.setDoOutput(true);
     		conn.setRequestMethod("POST");
