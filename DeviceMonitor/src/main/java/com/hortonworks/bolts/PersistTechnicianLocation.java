@@ -32,10 +32,11 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
-	private Constants constants = new Constants();
+	private Constants constants;
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
+		this.constants = new Constants();
 		TechnicianStatus technicianStatus = (TechnicianStatus) tuple.getValueByField("TechnicianStatus");
 		Configuration config = HBaseConfiguration.create();
 		config.set("hbase.zookeeper.quorum", constants.getZkHost());
