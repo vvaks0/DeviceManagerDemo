@@ -143,7 +143,7 @@ public class DeviceMonitorTopology {
         
       
       try {
-		StormSubmitter.submitTopology("DeviceMonitor", conf, builder.createTopology());
+		StormSubmitter.submitTopology("DeviceMonitorTopology", conf, builder.createTopology());
       } catch (AlreadyAliveException e) {
 		e.printStackTrace();
       } catch (InvalidTopologyException e) {
