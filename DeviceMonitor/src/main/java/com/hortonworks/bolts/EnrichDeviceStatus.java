@@ -89,7 +89,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 		Configuration config = HBaseConfiguration.create();
 		config.set("hbase.zookeeper.quorum", constants.getZkHost());
 		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
-		config.set("zookeeper.znode.parent", constants.getHbasePath());
+		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 		
 		String tableName = "DeviceDetails";
 	    HTable table = null;
