@@ -5,16 +5,21 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.storm.kafka.KeyValueScheme;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.hortonworks.events.TechnicianStatus;
 
+/*
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import storm.kafka.KeyValueScheme;
+*/
 
 public class TechnicianEventJSONScheme implements KeyValueScheme {
 

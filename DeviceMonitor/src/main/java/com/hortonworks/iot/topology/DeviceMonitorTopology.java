@@ -32,6 +32,9 @@ import com.hortonworks.util.Constants;
 import com.hortonworks.util.DeviceEventJSONScheme;
 import com.hortonworks.util.TechnicianEventJSONScheme;
 
+
+/*
+import backtype.storm.StormSubmitter;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
@@ -46,6 +49,28 @@ import storm.kafka.KafkaSpout;
 import storm.kafka.KeyValueSchemeAsMultiScheme;
 import storm.kafka.SpoutConfig;
 import storm.kafka.ZkHosts;
+*/
+
+import org.apache.storm.Config;
+import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.AuthorizationException;
+import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.kafka.BrokerHosts;
+import org.apache.storm.kafka.KafkaSpout;
+import org.apache.storm.kafka.KeyValueSchemeAsMultiScheme;
+import org.apache.storm.kafka.SpoutConfig;
+import org.apache.storm.kafka.ZkHosts;
+import org.apache.storm.spout.SchemeAsMultiScheme;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 
 public class DeviceMonitorTopology {        
     public static void main(String[] args) {
@@ -112,7 +137,6 @@ public class DeviceMonitorTopology {
               .withColumnFamily("cf");
       
       //HBaseBolt hbasePersistTechnicianLocation = new HBaseBolt("TechnicianEvents", technicianLocationMapper).withConfigKey("hbase.conf");
-      
   	  //builder.setSpout("DeviceSpout", new DeviceSpout());
       builder.setSpout("DeviceKafkaSpout", deviceKafkaSpout);
       builder.setBolt("EnrichDeviceStatus", new EnrichDeviceStatus(), 1).shuffleGrouping("DeviceKafkaSpout");      
@@ -131,21 +155,28 @@ public class DeviceMonitorTopology {
       builder.setBolt("PersistTechnicianLocation", new PersistTechnicianLocation(), 1).shuffleGrouping("TechnicianKafkaSpout");
       builder.setBolt("PublishTechnicianLocation", new PublishTechnicianLocation(), 1).shuffleGrouping("PersistTechnicianLocation");
       
-      //LocalCluster cluster = new LocalCluster();
       conf.setNumWorkers(1);
       conf.setMaxSpoutPending(5000);
       conf.setMaxTaskParallelism(1);
-      //cluster.submitTopology("DeviceMonitor", conf, builder.createTopology());
-        
       
-      try {
-		StormSubmitter.submitTopology("DeviceMonitorTopology", conf, builder.createTopology());
-      } catch (AlreadyAliveException e) {
-		e.printStackTrace();
-      } catch (InvalidTopologyException e) {
-		e.printStackTrace();
-      } catch (AuthorizationException e) {
-		e.printStackTrace();
-      }
+      //submitToLocal(builder, conf);
+      submitToCluster(builder, conf);
+ }
+ 
+ public static void submitToLocal(TopologyBuilder builder, Config conf){
+	 LocalCluster cluster = new LocalCluster();
+	 cluster.submitTopology("CreditCardTransactionMonitor", conf, builder.createTopology()); 
+ }
+ 
+ public static void submitToCluster(TopologyBuilder builder, Config conf){
+	 try {
+			StormSubmitter.submitTopology("CreditCardTransactionMonitor", conf, builder.createTopology());
+	      } catch (AlreadyAliveException e) {
+			e.printStackTrace();
+	      } catch (InvalidTopologyException e) {
+			e.printStackTrace();
+	      } catch (AuthorizationException e) {
+			e.printStackTrace();
+	      }
     }
 }
