@@ -74,6 +74,14 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
 		this.constants = new Constants();
+		
+		System.out.println("********************** Zookeeper Host: " + constants.getZkHost());
+        System.out.println("********************** Zookeeper Port: " + constants.getZkPort());
+        System.out.println("********************** Zookeeper ConnString: " + constants.getZkConnString());
+        System.out.println("********************** Zookeeper Kafka Path: " + constants.getZkKafkaPath());
+        System.out.println("********************** Zookeeper HBase Path: " + constants.getZkHBasePath());
+        System.out.println("********************** Cometd URI: " + constants.getPubSubUrl());
+		
 		Configuration config = HBaseConfiguration.create();
 		config.set("hbase.zookeeper.quorum", constants.getZkHost());
 		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
