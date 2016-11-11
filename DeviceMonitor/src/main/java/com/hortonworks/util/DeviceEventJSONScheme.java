@@ -20,7 +20,7 @@ import storm.kafka.KeyValueScheme;
  * Encodes a byte array into a single UTF-8 string. Very useful for testing and passing raw JSON messages around without
  * proper deserialization.
  */
-public class DeviceEventJSONScheme implements KeyValueScheme {
+public class DeviceEventJSONScheme implements Scheme {
 	private static final long serialVersionUID = 1L;
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
