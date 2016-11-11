@@ -165,12 +165,12 @@ public class DeviceMonitorTopology {
  
  public static void submitToLocal(TopologyBuilder builder, Config conf){
 	 LocalCluster cluster = new LocalCluster();
-	 cluster.submitTopology("CreditCardTransactionMonitor", conf, builder.createTopology()); 
+	 cluster.submitTopology("DeviceMonitorTopology", conf, builder.createTopology()); 
  }
  
  public static void submitToCluster(TopologyBuilder builder, Config conf){
 	 try {
-			StormSubmitter.submitTopology("CreditCardTransactionMonitor", conf, builder.createTopology());
+			StormSubmitter.submitTopology("DeviceMonitorTopology", conf, builder.createTopology());
 	      } catch (AlreadyAliveException e) {
 			e.printStackTrace();
 	      } catch (InvalidTopologyException e) {
