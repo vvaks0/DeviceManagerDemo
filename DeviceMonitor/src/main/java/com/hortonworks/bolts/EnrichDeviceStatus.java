@@ -30,25 +30,12 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 	private Constants constants;
+	private HTable table = null;
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
 		STBStatus deviceStatus = (STBStatus) tuple.getValueByField("DeviceStatus");
-		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", constants.getZkHost());
-		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
-		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 		
-		//System.out.println("Create Config...");
-	    // Instantiating HTable class
-	    HTable table = null;
-		try {
-			table = new HTable(config, "DeviceDetails");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	    //System.out.println("Get Table...");
-	    // Instantiating Get class
 	    Get get = new Get(Bytes.toBytes(deviceStatus.getSerialNumber()));
 	    System.out.println("Build Request...");
 	    // Reading the data
@@ -100,18 +87,20 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 		
 		String tableName = "DeviceDetails";
-	    HTable table = null;
 		try {
 			HBaseAdmin hbaseAdmin = new HBaseAdmin(config);
 			if (hbaseAdmin.tableExists(tableName)) {
 				table = new HTable(config, tableName);
+				System.out.println("********************** Acquired " + tableName);
 			}else{
+				System.out.println("********************** Table " + tableName + "does not exist, creating...");
 				HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-				
 				HColumnDescriptor cfColumnFamily = new HColumnDescriptor("cf".getBytes());
-				
 		        tableDescriptor.addFamily(cfColumnFamily);
 		        hbaseAdmin.createTable(tableDescriptor);
+		        System.out.println("********************** Created " + tableName);
+		        table = new HTable(config, tableName);
+		        System.out.println("********************** Acquired " + tableName);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

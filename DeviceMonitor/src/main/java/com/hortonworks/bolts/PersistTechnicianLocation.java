@@ -33,21 +33,11 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 	private Constants constants;
+	private HTable table = null;
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
 		TechnicianStatus technicianStatus = (TechnicianStatus) tuple.getValueByField("TechnicianStatus");
-		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", constants.getZkHost());
-		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
-		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
-
-	    HTable table = null;
-		try {
-			table = new HTable(config, "TechnicianEvents");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
 		Put p = new Put(Bytes.toBytes(technicianStatus.getTechnicianId()));
 		p.add(Bytes.toBytes("cf"), Bytes.toBytes("Status"), Bytes.toBytes(technicianStatus.getStatus()));
@@ -88,18 +78,19 @@ public class PersistTechnicianLocation extends BaseRichBolt {
 		config.set("zookeeper.znode.parent", constants.getZkHBasePath());
 		
 		String tableName = "TechnicianEvents";
-	    HTable table = null;
 		try {
 			HBaseAdmin hbaseAdmin = new HBaseAdmin(config);
 			if (hbaseAdmin.tableExists(tableName)) {
 				table = new HTable(config, tableName);
 			}else{
+				System.out.println("********************** Table " + tableName + "does not exist, creating...");
 				HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-				
 				HColumnDescriptor cfColumnFamily = new HColumnDescriptor("cf".getBytes());
-				
 		        tableDescriptor.addFamily(cfColumnFamily);
 		        hbaseAdmin.createTable(tableDescriptor);
+		        System.out.println("********************** Created " + tableName);
+		        table = new HTable(config, tableName);
+		        System.out.println("********************** Acquired " + tableName);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
