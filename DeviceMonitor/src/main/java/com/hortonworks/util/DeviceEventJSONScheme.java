@@ -14,12 +14,13 @@ import com.hortonworks.events.STBStatus;
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import storm.kafka.KeyValueScheme;
 
 /**
  * Encodes a byte array into a single UTF-8 string. Very useful for testing and passing raw JSON messages around without
  * proper deserialization.
  */
-public class DeviceEventJSONScheme implements Scheme {
+public class DeviceEventJSONScheme implements KeyValueScheme {
 	private static final long serialVersionUID = 1L;
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 

@@ -137,31 +137,20 @@
                         <mainClass></mainClass>
                     </transformer>
                 </transformers>
+                <filters>
+        			<filter>
+            			<artifact>*:*</artifact>
+            			<excludes>
+                			<exclude>META-INF/*.SF</exclude>
+                			<exclude>META-INF/*.DSA</exclude>
+                			<exclude>META-INF/*.RSA</exclude>
+            			</excludes>
+        			</filter>
+    			</filters>
             </configuration>
         </execution>
     </executions>
-</plugin>
- <!--  <plugin>
-    <artifactId>maven-assembly-plugin</artifactId>
-    <configuration>
-      <descriptorRefs>  
-        <descriptorRef>jar-with-dependencies</descriptorRef>
-      </descriptorRefs>
-      <archive>
-        <manifest>
-          <mainClass>com.hortonworks.iot.topology.DeviceMonitorTopology</mainClass>
-        </manifest>
-      </archive>
-    </configuration>
-    <executions>
-              <execution>
-                  <phase>package</phase>
-                  <goals>
-                      <goal>single</goal>
-                  </goals>
-              </execution>
-          </executions>
-  </plugin>  -->
+  </plugin>
   </plugins>
     <sourceDirectory>src/</sourceDirectory>
     <resources>
