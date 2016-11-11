@@ -7,7 +7,10 @@ import java.util.NavigableSet;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -42,6 +45,7 @@ public class RecommendTechnician extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 	private Constants constants;
+	HTable table = null;
 	
     public RecommendTechnician() {}
 
@@ -64,19 +68,6 @@ public class RecommendTechnician extends BaseRichBolt {
     	TechnicianStatus currentTechStatus = new TechnicianStatus();
     	TechnicianStatus recommendedTechStatus = new TechnicianStatus();
     	ResultScanner techLocationScanner;
-    	
-    	this.constants = new Constants();
-		Configuration config = HBaseConfiguration.create();
-		config.set("hbase.zookeeper.quorum", constants.getZkHost());
-		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
-		config.set("zookeeper.znode.parent", constants.getHbasePath());;		
-
-	    HTable table = null;
-		try {
-			table = new HTable(config, "TechnicianEvents");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
 	    Scan scan = new Scan();
 	    scan.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("Status"));
@@ -207,6 +198,28 @@ public class RecommendTechnician extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		 this.collector = collector;
+		 this.constants = new Constants();
+		 Configuration config = HBaseConfiguration.create();
+		 config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		 config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		 config.set("zookeeper.znode.parent", constants.getHbasePath());;		
+
+		 HBaseAdmin hbaseAdmin;
+		try {
+			hbaseAdmin = new HBaseAdmin(config);
+			while(!hbaseAdmin.tableExists("TechnicianEvents") && !hbaseAdmin.tableExists("DeviceDetails")){
+				Thread.sleep(1000);
+				System.out.println("******************** DeviceMonitor prepare() Waiting for HBase Tables to be prepared...");
+			}	
+		}catch (MasterNotRunningException e) {
+			e.printStackTrace();
+		} catch (ZooKeeperConnectionException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
