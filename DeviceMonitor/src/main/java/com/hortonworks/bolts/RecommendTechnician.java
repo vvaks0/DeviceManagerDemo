@@ -45,7 +45,7 @@ public class RecommendTechnician extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
 	private Constants constants;
-	HTable table = null;
+	private HTable table = null;
 	
     public RecommendTechnician() {}
 
@@ -197,20 +197,23 @@ public class RecommendTechnician extends BaseRichBolt {
 	}
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
-		 this.collector = collector;
-		 this.constants = new Constants();
-		 Configuration config = HBaseConfiguration.create();
-		 config.set("hbase.zookeeper.quorum", constants.getZkHost());
-		 config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
-		 config.set("zookeeper.znode.parent", constants.getHbasePath());;		
-
-		 HBaseAdmin hbaseAdmin;
+		this.collector = collector;
+		this.constants = new Constants();
+		Configuration config = HBaseConfiguration.create();
+		config.set("hbase.zookeeper.quorum", constants.getZkHost());
+		config.set("hbase.zookeeper.property.clientPort", constants.getZkPort());
+		config.set("zookeeper.znode.parent", constants.getHbasePath());;		
+		
+		String tableName = "TechnicianEvents";
+		HBaseAdmin hbaseAdmin;
 		try {
 			hbaseAdmin = new HBaseAdmin(config);
-			while(!hbaseAdmin.tableExists("TechnicianEvents") && !hbaseAdmin.tableExists("DeviceDetails")){
+			while(!hbaseAdmin.tableExists(tableName)){
 				Thread.sleep(1000);
 				System.out.println("******************** DeviceMonitor prepare() Waiting for HBase Tables to be prepared...");
-			}	
+			}
+			table = new HTable(config, tableName);
+			System.out.println("******************** Acquired HBase Table " + tableName);
 		}catch (MasterNotRunningException e) {
 			e.printStackTrace();
 		} catch (ZooKeeperConnectionException e) {
