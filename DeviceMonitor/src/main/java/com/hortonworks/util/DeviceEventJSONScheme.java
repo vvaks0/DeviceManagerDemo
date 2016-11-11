@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.storm.kafka.KeyValueScheme;
+import org.apache.storm.kafka.StringScheme;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import org.codehaus.jackson.JsonParseException;
@@ -63,13 +64,38 @@ public class DeviceEventJSONScheme implements KeyValueScheme {
         return new Values(stbStatus);
 	}
 
-	public List<Object> deserializeKeyAndValue(ByteBuffer arg0, ByteBuffer arg1) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Object> deserializeKeyAndValue(ByteBuffer key, ByteBuffer value) {
+		String eventKey = StringScheme.deserializeString(key);
+		String eventJSONString = StringScheme.deserializeString(value);
+		STBStatus stbStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+			stbStatus = mapper.readValue(eventJSONString, STBStatus.class);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return new Values(stbStatus);
 	}
-	public List<Object> deserialize(ByteBuffer arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Object> deserialize(ByteBuffer value) {
+		String eventJSONString = StringScheme.deserializeString(value);
+		STBStatus stbStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+			stbStatus = mapper.readValue(eventJSONString, STBStatus.class);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return new Values(stbStatus);
 	}
 	
 	public Fields getOutputFields() {
