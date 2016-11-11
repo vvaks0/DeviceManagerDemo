@@ -14,7 +14,6 @@ import com.hortonworks.events.STBStatus;
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import storm.kafka.KeyValueScheme;
 
 /**
  * Encodes a byte array into a single UTF-8 string. Very useful for testing and passing raw JSON messages around without

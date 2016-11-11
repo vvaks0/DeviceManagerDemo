@@ -14,7 +14,6 @@ import com.hortonworks.events.TechnicianStatus;
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import storm.kafka.KeyValueScheme;
 
 public class TechnicianEventJSONScheme implements Scheme {
 
