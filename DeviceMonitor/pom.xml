@@ -97,6 +97,10 @@
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
+				<exclusion> 
+    			<groupId>org.apache.curator</groupId>
+    			<artifactId>curator-framework</artifactId>
+  			</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
