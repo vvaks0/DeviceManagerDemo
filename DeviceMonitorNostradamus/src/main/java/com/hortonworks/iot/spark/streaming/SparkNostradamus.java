@@ -53,7 +53,7 @@ public class SparkNostradamus {
 		SparkConf sparkConf = new SparkConf();//.setMaster("local[4]").setAppName("Nostradamus").set("spark.driver.allowMultipleContexts", "true");
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
-		Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
+		//Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
 		final Broadcast<String> pubSubUrlBroadcast = jssc.sparkContext().broadcast(pubSubUrl);
 		final Broadcast<String> predictionChannelBroadcast = jssc.sparkContext().broadcast(predictionChannel);
 		final Broadcast<String> tempFailPredicationBroadcast = jssc.sparkContext().broadcast(tempFailPredication);
@@ -62,7 +62,7 @@ public class SparkNostradamus {
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
-		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", (Map<String,Integer>)kafkaConfigBroadcast);
+		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", kafkaConfig);
 				
 		//kafkaStream.print();
 		JavaPairDStream<String, String> deviceStream = kafkaStream;
