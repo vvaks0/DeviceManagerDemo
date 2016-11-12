@@ -359,8 +359,7 @@ sleep 5
 startNifiFlowReporter
 
 echo "*********************************Deploying Spark Streaming Application..."
-#nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master local[4] /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar 2>&1 $ROOT_PATH/DeviceMonitorNostradamus.log &
-nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master yarn --executor-memory 1G --num-executors 2 /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar 2>&1 $ROOT_PATH/DeviceMonitorNostradamus.log &
+nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master yarn-cluster --driver-memory 1G --executor-memory 1G --num-executors 1 /home/spark/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar >/dev/null 2>&1&
 
 echo "*********************************Deploying Application Container to..."
 # Ensure docker service is running
