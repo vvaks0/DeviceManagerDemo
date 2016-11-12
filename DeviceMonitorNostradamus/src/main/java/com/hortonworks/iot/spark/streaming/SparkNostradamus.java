@@ -13,6 +13,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
@@ -47,17 +48,18 @@ public class SparkNostradamus {
 		final String predictionChannel = constants.getPredictionChannel();
 		final String tempFailPredication = "Temperature pattern indicates imminent device failure. Contact customer or send technician";
 		
-		Map<String, Integer> kafkaTopics = new HashMap<String, Integer>();
-		kafkaTopics.put(constants.getDeviceTopicName(), 1);
+		Map<String, Integer> kafkaConfig = new HashMap<String, Integer>();
+		kafkaConfig.put(constants.getDeviceTopicName(), 1);
 		SparkConf sparkConf = new SparkConf();//.setMaster("local[4]").setAppName("Nostradamus").set("spark.driver.allowMultipleContexts", "true");
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
+		Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
-		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", kafkaTopics);
+		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", (Map<String,Integer>)kafkaConfigBroadcast);
 				
 		//kafkaStream.print();
 		JavaPairDStream<String, String> deviceStream = kafkaStream;
