@@ -53,6 +53,7 @@ public class SparkNostradamus {
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
 		jssc.checkpoint(constants.getSparkCheckpointPath());
+		jssc.sparkContext().setLogLevel("WARN");
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
