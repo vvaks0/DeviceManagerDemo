@@ -57,12 +57,13 @@ public class SparkNostradamus {
 		final Broadcast<String> pubSubUrlBroadcast = jssc.sparkContext().broadcast(pubSubUrl);
 		final Broadcast<String> predictionChannelBroadcast = jssc.sparkContext().broadcast(predictionChannel);
 		final Broadcast<String> tempFailPredicationBroadcast = jssc.sparkContext().broadcast(tempFailPredication);
+		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(constants.getZkConnString());
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
-		KafkaUtils.createStream(jssc, constants.getZkConnString(),"spark-streaming-consumer-group", kafkaConfig);
+		KafkaUtils.createStream(jssc, zkConnStringBroadcast.getValue(), "spark-streaming-consumer-group", kafkaConfig);
 				
 		//kafkaStream.print();
 		JavaPairDStream<String, String> deviceStream = kafkaStream;
