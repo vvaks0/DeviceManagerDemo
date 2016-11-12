@@ -54,6 +54,9 @@ public class SparkNostradamus {
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
 		Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
+		final Broadcast<String> pubSubUrlBroadcast = jssc.sparkContext().broadcast(pubSubUrl);
+		final Broadcast<String> predictionChannelBroadcast = jssc.sparkContext().broadcast(predictionChannel);
+		final Broadcast<String> tempFailPredicationBroadcast = jssc.sparkContext().broadcast(tempFailPredication);
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
@@ -160,10 +163,10 @@ public class SparkNostradamus {
 								System.out.println("*********************************************************************************");
 								Map<String, String> data = new HashMap<String, String>();
 								data.put("deviceSerialNumber", deviceSerialNumber);
-								data.put("predictionDescription", tempFailPredication);
+								data.put("predictionDescription", tempFailPredicationBroadcast.getValue());
 								
-								BayeuxClient bayuexClient = connectPubSub(pubSubUrl);
-								bayuexClient.getChannel(predictionChannel).publish(data);
+								BayeuxClient bayuexClient = connectPubSub(pubSubUrlBroadcast.getValue());
+								bayuexClient.getChannel(predictionChannelBroadcast.getValue()).publish(data);
 							}else{
 								System.out.println("*********************************************************************************");
 								System.out.println("**********************DEVICE FUNCTION NORMAL : " + prediction + predictionFeatures);
