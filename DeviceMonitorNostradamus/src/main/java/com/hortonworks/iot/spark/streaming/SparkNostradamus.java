@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.SparkEnv;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -60,6 +61,7 @@ public class SparkNostradamus {
 		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(constants.getZkConnString());
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
+		System.out.println("***************************" + jssc.sparkContext().getConf().getAll().toString());
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
