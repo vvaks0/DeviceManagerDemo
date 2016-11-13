@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import com.google.common.base.Optional;
 import com.hortonworks.iot.events.STBStatus;
 import com.hortonworks.iot.util.Constants;
 
+import scala.Function1;
 import scala.Tuple2;
 
 public class SparkNostradamus {
@@ -54,13 +56,13 @@ public class SparkNostradamus {
 		SparkConf sparkConf = new SparkConf();//.setMaster("local[4]").setAppName("Nostradamus").set("spark.driver.allowMultipleContexts", "true");
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
-		System.out.println("***************************" + jssc.sparkContext().getConf().getenv("ZK_HOST"));
+		
 		//Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
 		final Broadcast<String> pubSubUrlBroadcast = jssc.sparkContext().broadcast(pubSubUrl);
 		final Broadcast<String> predictionChannelBroadcast = jssc.sparkContext().broadcast(predictionChannel);
 		final Broadcast<String> tempFailPredicationBroadcast = jssc.sparkContext().broadcast(tempFailPredication);
-		final String zkConnString = jssc.sparkContext().getConf().getenv("ZK_HOST") + ":" + constants.getZkPort();
-		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(zkConnString);
+		//final String zkConnString = jssc.sparkContext().getConf().getenv("ZK_HOST") + ":" + constants.getZkPort();
+		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(constants.getZkConnString());
 		
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
