@@ -42,10 +42,10 @@ public class Constants {
 			Map<String, String> env = System.getenv();
 	        //System.out.println("********************** ENV: " + env);
 	        if(env.get("ZK_HOST") != null){
-	        	this.zkHost = (String)env.get("ZK_HOST");
+	        	this.setZkHost((String)env.get("ZK_HOST"));
 	        }
 	        if(env.get("ZK_PORT") != null){
-	        	this.zkPort = (String)env.get("ZK_PORT");
+	        	this.setZkPort((String)env.get("ZK_PORT"));
 	        }
 	        if(env.get("ZK_KAFKA_PATH") != null){
 	        	this.setZkKafkaPath((String)env.get("ZK_KAFKA_PATH"));
@@ -257,5 +257,21 @@ public class Constants {
 
 		public void setNameNodePort(String nameNodePort) {
 			this.nameNodePort = nameNodePort;
+		}
+
+		public String getZkHost() {
+			return zkHost;
+		}
+
+		public void setZkHost(String zkHost) {
+			this.zkHost = zkHost;
+		}
+
+		public String getZkPort() {
+			return zkPort;
+		}
+
+		public void setZkPort(String zkPort) {
+			this.zkPort = zkPort;
 		}
 }

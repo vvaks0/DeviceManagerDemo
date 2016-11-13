@@ -54,14 +54,17 @@ public class SparkNostradamus {
 		SparkConf sparkConf = new SparkConf();//.setMaster("local[4]").setAppName("Nostradamus").set("spark.driver.allowMultipleContexts", "true");
 		
 		JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(batchSize));
+		System.out.println("***************************" + jssc.sparkContext().getConf().getenv("ZK_HOST"));
 		//Broadcast<Map<String, Integer>> kafkaConfigBroadcast = jssc.sparkContext().broadcast(kafkaConfig);
 		final Broadcast<String> pubSubUrlBroadcast = jssc.sparkContext().broadcast(pubSubUrl);
 		final Broadcast<String> predictionChannelBroadcast = jssc.sparkContext().broadcast(predictionChannel);
 		final Broadcast<String> tempFailPredicationBroadcast = jssc.sparkContext().broadcast(tempFailPredication);
-		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(constants.getZkConnString());
+		final String zkConnString = jssc.sparkContext().getConf().getenv("ZK_HOST") + ":" + constants.getZkPort();
+		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(zkConnString);
+		
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
-		System.out.println("***************************" + jssc.sparkContext().getConf().getenv("ZK_HOST"));
+		
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
