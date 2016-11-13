@@ -61,7 +61,7 @@ public class SparkNostradamus {
 		final Broadcast<String> zkConnStringBroadcast = jssc.sparkContext().broadcast(constants.getZkConnString());
 		jssc.checkpoint(constants.getSparkCheckpointPath());
 		jssc.sparkContext().setLogLevel("WARN");
-		System.out.println("***************************" + jssc.sparkContext().getConf().get("env").toString());
+		System.out.println("***************************" + jssc.sparkContext().getConf().getenv("ZK_HOST"));
 		final SVMModel nostradamus = SVMModel.load(jssc.sparkContext().sc(), constants.getSparkModelPath()+"nostradamusSVMModel");
 		
 		JavaPairReceiverInputDStream<String, String> kafkaStream = 
