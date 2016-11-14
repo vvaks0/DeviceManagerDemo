@@ -70,6 +70,7 @@ public class RouteTechnician extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		this.constants = new Constants();
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
