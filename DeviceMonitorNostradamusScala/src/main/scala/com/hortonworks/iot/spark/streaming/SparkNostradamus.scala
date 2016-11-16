@@ -30,7 +30,7 @@ object SparkNostradamus {
     deviceStreamJSON.foreachRDD(_.collect().foreach(println))
     val deviceStream = deviceStreamJSON.map{ rdd => val deviceStatusEvent = JSON.parseFull(rdd._2).getOrElse("{}").asInstanceOf[Map[String,Any]]
                                                     val serialNumber = deviceStatusEvent.get("serialNumber").get.asInstanceOf[String]
-                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[String]
+                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[Int]
                                                     (serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
