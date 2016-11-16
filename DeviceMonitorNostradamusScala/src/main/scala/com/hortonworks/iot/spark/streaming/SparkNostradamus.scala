@@ -12,9 +12,9 @@ object SparkNostradamus {
     val sparkConf = new SparkConf().setAppName("SparkNostradamus")
     // Create the context
     val ssc = new StreamingContext(sparkConf, Seconds(1))
-    val kafkaBrokerHost = ssc.sparkContext.getConf.getExecutorEnv.foreach(println)
     ssc.sparkContext.setLogLevel("WARN")
     ssc.checkpoint("/demo/data/checkpoint");
+    ssc.sparkContext.getConf.getExecutorEnv.foreach(println)
     val nostradamus = SVMModel.load(ssc.sparkContext, "/demo/data/model/nostradamusSVMModel");
     val kafkaTopicConfig = Map(args(1) -> 1)    
     val deviceStreamJSON = KafkaUtils.createStream(ssc, args(0), "spark-streaming-group", kafkaTopicConfig)
