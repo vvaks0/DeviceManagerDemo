@@ -32,7 +32,12 @@ object SparkNostradamus {
                                                     //val serialNumber = deviceStatusEvent.get("serialNumber").asInstanceOf[String]
                                                     //val internalTemp = deviceStatusEvent.get("internalTemp").asInstanceOf[String]
                                                     //(serialNumber, internalTemp)   
-                                            }
+                                            }.map { mapRDD => {
+                                                                val serialNumber = mapRDD.get("serialNumber").asInstanceOf[String]
+                                                                val internalTemp = mapRDD.get("internalTemp").asInstanceOf[String]
+                                                                (serialNumber, internalTemp)
+                                                              }
+                                                  }
     deviceStream.foreachRDD(_.collect().foreach(println))
     //deviceStream.updateStateByKey(updateFunction)
                                  
