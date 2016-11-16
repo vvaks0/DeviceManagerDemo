@@ -59,7 +59,7 @@
                 </executions>
             </plugin>
     </plugins>
-     <sourceDirectory>src/</sourceDirectory>
+     <sourceDirectory>src/main/scala</sourceDirectory>
     <resources>
       <resource>
         <directory>${basedir}</directory>
