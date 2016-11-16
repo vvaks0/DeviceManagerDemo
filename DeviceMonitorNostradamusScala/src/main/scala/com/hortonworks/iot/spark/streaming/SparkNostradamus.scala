@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.kafka._
 import org.apache.spark.mllib.classification.SVMModel
+import org.apache.spark.mllib.linalg.Vectors
 import scala.util.parsing.json._
 
 object SparkNostradamus {
@@ -20,42 +21,40 @@ object SparkNostradamus {
     deviceStreamJSON.foreachRDD(_.collect().foreach(println))
     val deviceStream = deviceStreamJSON.map{ rdd => val deviceStatusEvent = JSON.parseFull(rdd._2).getOrElse("{}").asInstanceOf[Map[String,Any]]
                                                     val serialNumber = deviceStatusEvent.get("serialNumber").get.asInstanceOf[String]
-                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[Int].toString()
+                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[Int].toDouble
                                                     (serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
-    deviceStream.updateStateByKey(fillFeatureList).foreachRDD(rdd => {
-                                                                          val featureList = rdd.take(10)
-                                                                          if(featureList.size == 10){
-                                                                            println("Feature list has reached required size... " + featureList)
-                                                                            println("Making a prediction...")
-                                                                            val predictionFeatures = Vectors.dense(featureList.toArray);	
-							                                                              val prediction = nostradamus.predict(predictionFeatures);
-							                                                              if(prediction == 1.0){
-								                                                              println("*********************************************************************************");
-								                                                              println("**********************DEVICE FAILURE IMMINENT: " + prediction + predictionFeatures);
-								                                                              println("*********************************************************************************");
-								//Map<String, String> data = new HashMap<String, String>();
-								//data.put("deviceSerialNumber", deviceSerialNumber);
-								//data.put("predictionDescription", tempFailPredicationBroadcast.getValue());
-								
-								//BayeuxClient bayuexClient = connectPubSub(pubSubUrlBroadcast.getValue());
-								//bayuexClient.getChannel(predictionChannelBroadcast.getValue()).publish(data);
-							                                                               }else{
-								                                                               println("*********************************************************************************");
-								                                                               println("**********************DEVICE FUNCTION NORMAL : " + prediction + predictionFeatures);
-								                                                               println("*********************************************************************************");
-							                                                               }
-                                                                          }else{
-                                                                            println("Not enough events to make a prediction...")
-                                                                          }
-                                                                       }
-                                                                )
+    deviceStream.updateStateByKey(fillFeatureList).map(_._2).foreachRDD(rdd => {
+                                                                                rdd.map(x => x.toArray.take(10)).foreach(featureList =>
+                                                                                {
+                                                                                  if(featureList.size == 10){
+                                                                                    println("Feature list has reached required size... " + featureList)
+                                                                                    println("Making a prediction...")
+                                                                                    val predictionFeatures = Vectors.dense(featureList)	
+							                                                                      val prediction = nostradamus.predict(predictionFeatures)
+							                                                                      if(prediction == 1.0){
+								                                                                      println("*********************************************************************************");
+								                                                                      println("**********************DEVICE FAILURE IMMINENT: " + prediction + predictionFeatures);
+								                                                                      println("*********************************************************************************");
+							                                                                      }else{
+								                                                                      println("*********************************************************************************");
+								                                                                      println("**********************DEVICE FUNCTION NORMAL : " + prediction + predictionFeatures);
+								                                                                      println("*********************************************************************************");
+							                                                                     }
+                                                                                }else{
+                                                                                  println("Not enough events to make a prediction...")
+                                                                                }
+                                                                               }
+                                                                              )
+                                                                             }  
+
+                                                                        )
     ssc.start()
     ssc.awaitTermination()
   }
   
-  def fillFeatureList(incomingEventList: Seq[(String)], currentEventWindow: Option[List[String]]): Option[List[String]] = {
+  def fillFeatureList(incomingEventList: Seq[(Double)], currentEventWindow: Option[List[Double]]): Option[List[Double]] = {
     println("Current Event List... " + currentEventWindow)
     println("Incoming Event List... " + incomingEventList)
     val updatedEventWindow = currentEventWindow.getOrElse(List()).++(incomingEventList)
@@ -68,7 +67,7 @@ object SparkNostradamus {
     println("Returning Event List " + returnEventWindow)
     Some(returnEventWindow)
   }
-
+}
 /*
 case class DeviceStatus(
         serialNumber:String, 
