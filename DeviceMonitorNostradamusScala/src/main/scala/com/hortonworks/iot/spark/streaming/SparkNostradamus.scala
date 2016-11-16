@@ -30,17 +30,30 @@ object SparkNostradamus {
     deviceStreamJSON.foreachRDD(_.collect().foreach(println))
     val deviceStream = deviceStreamJSON.map{ rdd => val deviceStatusEvent = JSON.parseFull(rdd._2).getOrElse("{}").asInstanceOf[Map[String,Any]]
                                                     val serialNumber = deviceStatusEvent.get("serialNumber").get.asInstanceOf[String]
-                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[Int]
+                                                    val internalTemp = deviceStatusEvent.get("internalTemp").get.asInstanceOf[Int].toString()
                                                     (serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
-    //deviceStream.updateStateByKey(updateFunction)
+    deviceStream.updateStateByKey(fillFeatureWindow)
                                  
-    
     
     ssc.start()
     ssc.awaitTermination()
   }
+  def fillFeatureWindow(incomingEventList: Seq[(String)], currentEventWindow: Option[List[String]]): Option[List[String]] = {
+    println("Current Event List " + currentEventWindow)
+    println("Incoming Event List " + incomingEventList)
+    val updatedEventWindow = currentEventWindow.get.++(incomingEventList)
+    println("Updated Event List " + updatedEventWindow)
+    val returnEventWindow = if(updatedEventWindow.size >= 10){
+      updatedEventWindow.drop(10)
+    }else{ 
+      updatedEventWindow
+    }
+    println("Returning Event List " + returnEventWindow)
+    Some(returnEventWindow)
+  }
+  
   def updateFunction(eventList: Seq[(String)], tempEventWindow: Option[(String)]): Option[(String)] = 
   {
       val eventWindowArray = null
