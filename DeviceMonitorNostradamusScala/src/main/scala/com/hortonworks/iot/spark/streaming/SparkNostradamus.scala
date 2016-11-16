@@ -29,9 +29,9 @@ object SparkNostradamus {
     val deviceStreamJSON = KafkaUtils.createStream(ssc, args(0), "spark-streaming-group", kafkaTopicConfig)
     deviceStreamJSON.foreachRDD(_.collect().foreach(println))
     val deviceStream = deviceStreamJSON.map{ rdd => val deviceStatus = JSON.parseFull(rdd._2).getOrElse("{}").asInstanceOf[Map[String,Any]]
-                                                        val serialNumber = deviceStatus.get("serialNumber").asInstanceOf[String]
-                                                        val internalTemp = deviceStatus.get("internalTemp").asInstanceOf[String]
-                                                        (serialNumber, internalTemp)   
+                                                        //val serialNumber = deviceStatus.get("serialNumber").asInstanceOf[String]
+                                                        //val internalTemp = deviceStatus.get("internalTemp").asInstanceOf[String]
+                                                        //(serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
     //deviceStream.updateStateByKey(updateFunction)
