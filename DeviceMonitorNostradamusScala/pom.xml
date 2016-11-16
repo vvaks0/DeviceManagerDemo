@@ -94,21 +94,6 @@
                 </configuration>
             </plugin>
     </plugins>
-     <sourceDirectory>src/</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>${basedir}</directory>
-        <includes>
-          <include>*</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>src/resources</directory>
-        <includes>
-          <include>*</include>
-        </includes>
-      </resource>
-    </resources>
     <outputDirectory>classes/</outputDirectory>
   </build>
 </project>
