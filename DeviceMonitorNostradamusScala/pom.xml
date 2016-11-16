@@ -6,17 +6,17 @@
   <dependencies>
   	<dependency>
     	<groupId>org.apache.spark</groupId>
-    	<artifactId>spark-streaming_2.11</artifactId>
+    	<artifactId>spark-streaming_2.10</artifactId>
     	<version>1.6.1</version>
   	</dependency>
   	<dependency>
     	<groupId>org.apache.spark</groupId>
-    	<artifactId>spark-streaming-kafka_2.11</artifactId>
+    	<artifactId>spark-streaming-kafka_2.10</artifactId>
     	<version>1.6.1</version>
   	</dependency>
   	<dependency>
 		<groupId>org.apache.spark</groupId>
-		<artifactId>spark-mllib_2.11</artifactId>
+		<artifactId>spark-mllib_2.10</artifactId>
 		<version>1.6.1</version>
 	</dependency>
   </dependencies>
