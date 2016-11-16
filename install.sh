@@ -509,9 +509,9 @@ cp -vf target/DeviceMonitor-0.0.1-SNAPSHOT.jar /home/storm
 
 echo "*********************************Building Device Monitor Nostradamus Application..."
 #Build Spark Project and Copy to working folder
-cd $ROOT_PATH/DeviceMonitorNostradamus
+cd $ROOT_PATH/DeviceMonitorNostradamusScala
 mvn clean package
-cp target/DeviceMonitorNostradamus-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
+cp target/DeviceMonitorNostradamusScala-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
 cd $ROOT_PATH
 
 #Build Device Simulator from source
