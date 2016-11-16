@@ -33,7 +33,7 @@ object SparkNostradamus {
                                                         val internalTemp = deviceStatus.get("internalTemp").asInstanceOf[String]
                                                         (serialNumber, internalTemp)   
                                             }
-    //deviceStream.foreachRDD(_.collect().foreach(println))
+    deviceStream.foreachRDD(_.collect().foreach(println))
     //deviceStream.updateStateByKey(updateFunction)
                                  
     
