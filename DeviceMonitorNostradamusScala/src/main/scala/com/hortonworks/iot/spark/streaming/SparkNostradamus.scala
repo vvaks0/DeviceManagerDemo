@@ -34,7 +34,17 @@ object SparkNostradamus {
                                                     (serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
-    deviceStream.updateStateByKey(fillFeatureWindow)
+    deviceStream.updateStateByKey(fillFeatureWindow).foreachRDD(rdd => {
+                                                                          val featureList = rdd.take(10)
+                                                                          if(featureList.size == 10){
+                                                                            println("Feature list has reached required size..." + featureList)
+                                                                            println("Making a prediction...")
+                                                                          }else{
+                                                                            println("Not enough events to make a prediction...")
+                                                                          }
+                                                                            
+                                                                       }
+                                                               )
                                  
     
     ssc.start()

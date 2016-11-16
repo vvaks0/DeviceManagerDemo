@@ -44,6 +44,7 @@ import scala.Tuple2;
 public class SparkNostradamus {
 	private static Constants constants;
 	
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		constants = new Constants();
 		final Integer batchSize = 1;
