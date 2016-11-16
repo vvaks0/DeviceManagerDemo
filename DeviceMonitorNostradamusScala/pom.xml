@@ -21,16 +21,44 @@
 	</dependency>
   </dependencies>
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
-        <configuration>
-          <source/>
-          <target/>
-        </configuration>
-      </plugin>
+    	<artifactId>maven-assembly-plugin</artifactId>
+    	<configuration>
+      		<descriptorRefs>  
+        		<descriptorRef>jar-with-dependencies</descriptorRef>
+     		</descriptorRefs>
+      		<archive>
+        		<manifest>
+          			<mainClass>com.hortonworks.iot.spark.streaming.SparkNostradamus</mainClass>
+        		</manifest>
+      		</archive>
+    	</configuration>
+    	<executions>
+              <execution>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>single</goal>
+                  </goals>
+              </execution>
+        </executions>
+  		</plugin>
     </plugins>
+     <sourceDirectory>src/</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>*</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/resources</directory>
+        <includes>
+          <include>*</include>
+        </includes>
+      </resource>
+    </resources>
+    <outputDirectory>classes/</outputDirectory>
   </build>
 </project>
