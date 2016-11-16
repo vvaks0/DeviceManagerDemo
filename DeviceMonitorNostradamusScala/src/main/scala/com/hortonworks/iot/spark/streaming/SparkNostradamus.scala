@@ -53,7 +53,7 @@ object SparkNostradamus {
   def fillFeatureWindow(incomingEventList: Seq[(String)], currentEventWindow: Option[List[String]]): Option[List[String]] = {
     println("Current Event List " + currentEventWindow)
     println("Incoming Event List " + incomingEventList)
-    val updatedEventWindow = currentEventWindow.get.++(incomingEventList)
+    val updatedEventWindow = currentEventWindow.getOrElse(List()).++(incomingEventList)
     println("Updated Event List " + updatedEventWindow)
     val returnEventWindow = if(updatedEventWindow.size >= 10){
       updatedEventWindow.drop(10)
