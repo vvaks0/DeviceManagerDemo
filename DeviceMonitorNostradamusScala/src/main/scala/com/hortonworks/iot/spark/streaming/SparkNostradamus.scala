@@ -12,19 +12,9 @@ object SparkNostradamus {
     // Create the context
     val ssc = new StreamingContext(sparkConf, Seconds(1))
     ssc.sparkContext.setLogLevel("WARN")
-    ssc.checkpoint("/tmp");
-    //val nostradamus = SVMModel.load(ssc.sparkContext, ""+"nostradamusSVMModel");
-    
-    case class DeviceStatus(
-        serialNumber:String, 
-        status:String, 
-        state:String, 
-        deviceModel:String, 
-        internalTemp:Int, 
-        signalStrength:Int, 
-        latitude:Double, 
-        longitude:Double)
-	
+    ssc.checkpoint("/demo/data/checkpoint");
+    val nostradamus = SVMModel.load(ssc.sparkContext, "/demo/data/model/nostradamusSVMModel");
+
     val kafkaTopicConfig = Map(args(1) -> 1)    
     val deviceStreamJSON = KafkaUtils.createStream(ssc, args(0), "spark-streaming-group", kafkaTopicConfig)
     deviceStreamJSON.foreachRDD(_.collect().foreach(println))
@@ -34,28 +24,43 @@ object SparkNostradamus {
                                                     (serialNumber, internalTemp)   
                                             }
     deviceStream.foreachRDD(_.collect().foreach(println))
-    deviceStream.updateStateByKey(fillFeatureWindow).foreachRDD(rdd => {
+    deviceStream.updateStateByKey(fillFeatureList).foreachRDD(rdd => {
                                                                           val featureList = rdd.take(10)
                                                                           if(featureList.size == 10){
-                                                                            println("Feature list has reached required size..." + featureList)
+                                                                            println("Feature list has reached required size... " + featureList)
                                                                             println("Making a prediction...")
+                                                                            val predictionFeatures = Vectors.dense(featureList.toArray);	
+							                                                              val prediction = nostradamus.predict(predictionFeatures);
+							                                                              if(prediction == 1.0){
+								                                                              println("*********************************************************************************");
+								                                                              println("**********************DEVICE FAILURE IMMINENT: " + prediction + predictionFeatures);
+								                                                              println("*********************************************************************************");
+								//Map<String, String> data = new HashMap<String, String>();
+								//data.put("deviceSerialNumber", deviceSerialNumber);
+								//data.put("predictionDescription", tempFailPredicationBroadcast.getValue());
+								
+								//BayeuxClient bayuexClient = connectPubSub(pubSubUrlBroadcast.getValue());
+								//bayuexClient.getChannel(predictionChannelBroadcast.getValue()).publish(data);
+							                                                               }else{
+								                                                               println("*********************************************************************************");
+								                                                               println("**********************DEVICE FUNCTION NORMAL : " + prediction + predictionFeatures);
+								                                                               println("*********************************************************************************");
+							                                                               }
                                                                           }else{
                                                                             println("Not enough events to make a prediction...")
                                                                           }
-                                                                            
                                                                        }
-                                                               )
-                                 
-    
+                                                                )
     ssc.start()
     ssc.awaitTermination()
   }
-  def fillFeatureWindow(incomingEventList: Seq[(String)], currentEventWindow: Option[List[String]]): Option[List[String]] = {
-    println("Current Event List " + currentEventWindow)
-    println("Incoming Event List " + incomingEventList)
+  
+  def fillFeatureList(incomingEventList: Seq[(String)], currentEventWindow: Option[List[String]]): Option[List[String]] = {
+    println("Current Event List... " + currentEventWindow)
+    println("Incoming Event List... " + incomingEventList)
     val updatedEventWindow = currentEventWindow.getOrElse(List()).++(incomingEventList)
     println("Updated Event List " + updatedEventWindow)
-    val returnEventWindow = if(updatedEventWindow.size >= 10){
+    val returnEventWindow = if(updatedEventWindow.size > 10){
       updatedEventWindow.drop(10)
     }else{ 
       updatedEventWindow
@@ -63,70 +68,18 @@ object SparkNostradamus {
     println("Returning Event List " + returnEventWindow)
     Some(returnEventWindow)
   }
-  
-  def updateFunction(eventList: Seq[(String)], tempEventWindow: Option[(String)]): Option[(String)] = 
-  {
-      val eventWindowArray = null
-				
-     //Check if State is Present
-      if(tempEventWindow.isEmpty){
-				//Turn state from String to Array
-				System.out.println("Temp Event Window: " + tempEventWindow.get.replaceAll("Optional.of\\(", "").replaceAll("\\)", ""));
-				System.out.println("Temp Event Window Split Length: " + tempEventWindow.get.split(",").length);
-				System.out.println("EventList Size: " + eventList.size)
-					
-				val eventWindowArrayLength = eventList.size + tempEventWindow.get.split(",").length
-				val eventWindowArray = tempEventWindow.get.replaceAll("Optional.of\\(", "").replaceAll("\\)", "").split(",")
-				System.out.println("eventWindowArray Length: " + eventWindowArray.length);
-					
-				var featureWindowList = eventWindowArray.toList
-				System.out.println("featureWindowList Length: " + featureWindowList.size);
-					
-				//If state list size == 10 (expected feature Vector size), clear list and add new events
-				if(featureWindowList.size == 10){
-				  featureWindowList = List[String]()
-					for (event <- eventList){
-						featureWindowList.:+(event)	
-					}	
-			  //If state list size > 10 (expected feature Vector size), remove elements in position <= 10
-			  }else if(featureWindowList.size > 10){
-					featureWindowList.drop(10)
-					//Add new events to state list
-					for(event <- eventList){
-					  featureWindowList.+:(event);	
-			    }
-					//If state < 10, add new events to eventWindow array	
-			  }else{
-			    System.out.println("eventWindowArray Length: " + eventWindowArray.length);
-				  for(event <- eventList){
-				    featureWindowList.+:(event)	
-				  }
-			  }
-			  System.out.println("featureWindowList: " + featureWindowList.toString);
-			  //Convert state list back to Optional String
-			  //tempEventWindow = featureWindowList.toString 
-			  /*
-			  for(int k=0; k<featureWindowList.size(); k++){
-				  if(k==0){
-					  tempEventWindow = Optional.of(featureWindowList.get(k));
-				  }else{
-					  tempEventWindow = Optional.of(tempEventWindow + "," + featureWindowList.get(k));
-					}
-			  }*/
-		  }else{
-				//If state Optional does not exist, create it	
-				//tempEventWindow = 	for(event <- eventList){
-		        //tempEventWindow = Optional.of(event);
-						//}else{
-						//	tempEventWindow = Optional.of(tempEventWindow + "," + eventList.get(i));
-						//}
-				//}
-		 }		
-	  tempEventWindow  
-  }
-}
 
 /*
+case class DeviceStatus(
+        serialNumber:String, 
+        status:String, 
+        state:String, 
+        deviceModel:String, 
+        internalTemp:Int, 
+        signalStrength:Int, 
+        latitude:Double, 
+        longitude:Double)
+        
 val deviceStreamJSON = KafkaUtils.createStream(ssc, args(0), "spark-streaming-group", kafkaTopicConfig)
     val deviceStream = deviceStreamJSON.mapValues { rdd => val deviceStatus = JSON.parseFull(rdd).get.asInstanceOf[Map[String,Any]]
                                                         val serialNumber = deviceStatus.get("serialNumber").asInstanceOf[String]
