@@ -12,8 +12,8 @@ object SparkNostradamus {
     // Create the context
     val ssc = new StreamingContext(sparkConf, Seconds(1))
     ssc.sparkContext.setLogLevel("WARN")
-    ssc.checkpoint("");
-    val nostradamus = SVMModel.load(ssc.sparkContext, ""+"nostradamusSVMModel");
+    ssc.checkpoint("/tmp");
+    //val nostradamus = SVMModel.load(ssc.sparkContext, ""+"nostradamusSVMModel");
     
     case class DeviceStatus(
         serialNumber:String, 
