@@ -78,6 +78,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <sourceDir>src/main/scala</sourceDir>
+                </configuration>
             </plugin>
     </plugins>
      <sourceDirectory>src/</sourceDirectory>
