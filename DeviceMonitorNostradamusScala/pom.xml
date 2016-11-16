@@ -80,7 +80,7 @@
                 </executions>
             </plugin>
     </plugins>
-     <sourceDirectory>src/main/scala</sourceDirectory>
+     <sourceDirectory>src/</sourceDirectory>
     <resources>
       <resource>
         <directory>${basedir}</directory>
