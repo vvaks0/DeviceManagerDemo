@@ -47,6 +47,7 @@ object SparkNostradamus {
 								                                                                      httpClient.start
                                                                                       val bayuexClient = new BayeuxClient(cometdUrl.value, new LongPollingTransport( new java.util.HashMap[String,Object](), httpClient))
 								                                                                      bayuexClient.handshake
+								                                                                      println("Attempting to connect to: " + cometdUrl.value)
 								                                                                      if (bayuexClient.waitFor(3000, BayeuxClient.State.CONNECTED)){
 		                                                                                    println("Connected to Cometd Http PubSub Platform")
 								                                                                        val data = new java.util.HashMap[String,String]()
