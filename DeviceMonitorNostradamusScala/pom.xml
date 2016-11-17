@@ -19,6 +19,11 @@
 		<artifactId>spark-mllib_2.10</artifactId>
 		<version>1.6.1</version>
 	</dependency>
+	<dependency>
+		<groupId>org.cometd.java</groupId>
+		<artifactId>cometd-java-client</artifactId>
+		<version>3.0.7</version>
+	</dependency>
   </dependencies>
   <build>
     <plugins>
