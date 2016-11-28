@@ -1,0 +1,24 @@
+{
+  "name": "default",
+  "description": "default quick links configuration",
+  "configuration": {
+    "protocol":
+    {
+      "type":"http",
+      "checks":[]
+    },
+
+    "links": [
+      {
+        "name": "device_manager_map_ui",
+        "label": "Device Manager Map UI",
+        "requires_user_name": "false",
+        "component_name": "NIFI_MASTER",
+        "url":"%@://%@:%@/MapUI/DeviceMap",
+        "port":{
+          "http_default_port": "8090"
+        }
+      }
+    ]
+  }
+}
