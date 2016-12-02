@@ -348,8 +348,8 @@ mvn clean package
 java -jar target/DataPlaneUtils-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
 # Recreate TransactionHistory table to reset Atlas qualified name to this cluster
-echo "*********************************Recreating TransactionHistory Table..."
-recreateTransactionHistoryTable
+#echo "*********************************Recreating TransactionHistory Table..."
+#recreateTransactionHistoryTable
 
 # Redeploy Storm Topology to send topology meta data to Atlas
 echo "*********************************Redeploying Storm Topology..."
