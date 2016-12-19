@@ -788,9 +788,9 @@ docker pull vvaks/cometd
 
 echo "*********************************Checking Yarn and Phoenix Configurations..."
 configureYarnMemory
-enablePhoenix
-stopService HBASE
-startService HBASE
+#enablePhoenix
+#stopService HBASE
+#startService HBASE
 echo "*********************************Setting Ambari-Server to Start on Boot..."
 chkconfig --add ambari-server
 chkconfig ambari-server on
