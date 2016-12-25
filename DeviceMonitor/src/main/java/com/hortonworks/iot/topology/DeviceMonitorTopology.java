@@ -76,16 +76,16 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
 public class DeviceMonitorTopology {   
-	static String topologyName = "CreditCardTransactionMonitor";
+	static String topologyName = "DeviceMonitorTopology";
     public static void main(String[] args) {
      TopologyBuilder builder = new TopologyBuilder();
      Constants constants = new Constants();
      String hostClusterName = null; 
-     String deviceLogTable = "transaction_history";
+     String deviceLogTable = "device_status_log";
      if(args[0] != null){
      	hostClusterName = args[0];
-    	topologyName = "CreditCardTransactionMonitor-"+hostClusterName;
-    	deviceLogTable = "transaction_history_"+hostClusterName;
+    	topologyName = "DeviceMonitorTopology-"+hostClusterName;
+    	deviceLogTable = "device_status_log_"+hostClusterName;
      }
      // Use pipe as record boundary
   	  RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter(",");
@@ -187,12 +187,12 @@ public class DeviceMonitorTopology {
  
  public static void submitToLocal(TopologyBuilder builder, Config conf){
 	 LocalCluster cluster = new LocalCluster();
-	 cluster.submitTopology("DeviceMonitorTopology", conf, builder.createTopology()); 
+	 cluster.submitTopology(topologyName, conf, builder.createTopology()); 
  }
  
  public static void submitToCluster(TopologyBuilder builder, Config conf){
 	 try {
-			StormSubmitter.submitTopology("DeviceMonitorTopology", conf, builder.createTopology());
+			StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
 	      } catch (AlreadyAliveException e) {
 			e.printStackTrace();
 	      } catch (InvalidTopologyException e) {
