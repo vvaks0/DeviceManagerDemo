@@ -110,8 +110,8 @@ public class IncidentDetector extends BaseRichBolt {
 						+ "\"serialNumber\" VARCHAR PRIMARY KEY, "
 						+ "\"state\" VARCHAR, "
 						+ "\"status\" VARCHAR, "
-						+ "\"internalTemp\" INT, "
-						+ "\"signalStrength\" INT)");
+						+ "\"internalTemp\" INTEGER, "
+						+ "\"signalStrength\" INTEGER)");
 				conn.commit();
 				
 		        System.out.println("********************** Created " + tableName);
