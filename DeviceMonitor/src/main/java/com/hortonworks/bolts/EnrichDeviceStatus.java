@@ -121,24 +121,24 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 						+ "\"Port\" VARCHAR, ");
 				conn.commit();
 				
-				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
-						+ "('Motorolla', "
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" VALUES("
+						+ "'Motorolla', "
 						+ "'39.951694', "
 						+ "'-75.144596', "
 						+ "'192.168.56.1', "
 						+ "'8085')");
 				conn.commit();
 				
-				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
-						+ "('Motorolla', "
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" VALUES("
+						+ "'Motorolla', "
 						+ "'39.951694', "
 						+ "'-75.144596', "
 						+ "'192.168.56.1', "
 						+ "'8087')");
 				conn.commit();
 				
-				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
-						+ "('Motorolla', "
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" VALUES("
+						+ "'Motorolla', "
 						+ "'39.951694', "
 						+ "'-75.144596', "
 						+ "'192.168.56.1', "

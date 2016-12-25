@@ -66,8 +66,8 @@ public class IncidentDetector extends BaseRichBolt {
 		}
 		
 		try {
-			conn.createStatement().executeUpdate("UPSERT INTO \"DeviceStatusLog\" "
-					+ "('"+deviceStatus.getSerialNumber()+"', "
+			conn.createStatement().executeUpdate("UPSERT INTO \"DeviceStatusLog\" VALUES("
+					+ "'"+deviceStatus.getSerialNumber()+"', "
 					+ "'"+deviceStatus.getStatus()+"', "
 					+ "'"+deviceStatus.getState()+"', "
 					+ ""+deviceStatus.getInternalTemp()+", "
