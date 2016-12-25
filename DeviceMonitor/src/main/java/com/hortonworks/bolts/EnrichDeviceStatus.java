@@ -112,13 +112,13 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 				System.out.println("********************** Table " + tableName + "does not exist, creating...");
 				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
 				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
-				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceDetailsBI\" "
-						+ "(\"SerialNumber\" VARCHAR PRIMARY KEY, "
-						+ "\"DeviceModel\" VARCHAR, "
-						+ "\"Latitude\" VARCHAR, "
-						+ "\"Longitude\" VARCHAR, "
-						+ "\"IpAddress\" VARCHAR, "
-						+ "\"Port\" VARCHAR)");
+				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceDetailsBI\" ("
+						+ "\"serialNumber\" VARCHAR PRIMARY KEY, "
+						+ "\"deviceModel\" VARCHAR, "
+						+ "\"latitude\" VARCHAR, "
+						+ "\"longitude\" VARCHAR, "
+						+ "\"ipAddress\" VARCHAR, "
+						+ "\"port\" VARCHAR)");
 				conn.commit();
 				
 				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" VALUES("

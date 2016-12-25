@@ -106,9 +106,9 @@ public class IncidentDetector extends BaseRichBolt {
 				System.out.println("********************** Table " + tableName + "does not exist, creating...");
 				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
 				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
-				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceStatusLog\" "
-						+ "(\"serialNumber\" VARCHAR PRIMARY KEY, "
-						+ "(\"state\" VARCHAR, "
+				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceStatusLog\" ("
+						+ "\"serialNumber\" VARCHAR PRIMARY KEY, "
+						+ "\"state\" VARCHAR, "
 						+ "\"status\" VARCHAR, "
 						+ "\"internalTemp\" INT, "
 						+ "\"signalStrength\" INT)");
