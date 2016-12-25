@@ -118,7 +118,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 						+ "\"Latitude\" VARCHAR, "
 						+ "\"Longitude\" VARCHAR, "
 						+ "\"IpAddress\" VARCHAR, "
-						+ "\"Port\" VARCHAR, ");
+						+ "\"Port\" VARCHAR)");
 				conn.commit();
 				
 				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" VALUES("
