@@ -82,6 +82,7 @@ public class IncidentDetector extends BaseRichBolt {
 
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.collector = collector;
+		constants = new Constants();
 		System.out.println("********************** Zookeeper Host: " + constants.getZkHost());
         System.out.println("********************** Zookeeper Port: " + constants.getZkPort());
         System.out.println("********************** Zookeeper ConnString: " + constants.getZkConnString());
