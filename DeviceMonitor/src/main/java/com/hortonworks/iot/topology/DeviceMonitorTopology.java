@@ -16,6 +16,9 @@ import org.apache.storm.hdfs.bolt.rotation.FileSizeRotationPolicy;
 import org.apache.storm.hdfs.bolt.rotation.FileSizeRotationPolicy.Units;
 import org.apache.storm.hdfs.bolt.sync.CountSyncPolicy;
 import org.apache.storm.hdfs.bolt.sync.SyncPolicy;
+import org.apache.storm.hive.bolt.HiveBolt;
+import org.apache.storm.hive.bolt.mapper.DelimitedRecordHiveMapper;
+import org.apache.storm.hive.common.HiveOptions;
 
 import com.hortonworks.bolts.EnrichDeviceStatus;
 import com.hortonworks.bolts.IncidentDetector;
@@ -72,10 +75,18 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
-public class DeviceMonitorTopology {        
+public class DeviceMonitorTopology {   
+	static String topologyName = "CreditCardTransactionMonitor";
     public static void main(String[] args) {
      TopologyBuilder builder = new TopologyBuilder();
-     Constants constants = new Constants();   
+     Constants constants = new Constants();
+     String hostClusterName = null; 
+     String deviceLogTable = "transaction_history";
+     if(args[0] != null){
+     	hostClusterName = args[0];
+    	topologyName = "CreditCardTransactionMonitor-"+hostClusterName;
+    	deviceLogTable = "transaction_history_"+hostClusterName;
+     }
      // Use pipe as record boundary
   	  RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter(",");
 
@@ -131,10 +142,19 @@ public class DeviceMonitorTopology {
       conf.put("hbase.conf", hbConf);
       conf.put("hbase.rootdir", constants.getNameNodeUrl() + constants.getHbasePath());
       
-      SimpleHBaseMapper technicianLocationMapper = new SimpleHBaseMapper()
-              .withRowKeyField("TechnicianId")
-              .withColumnFields(new Fields("TechnicianStatus","Latitude","Longitude"))
-              .withColumnFamily("cf");
+      SimpleHBaseMapper deviceStatusLogMapper = new SimpleHBaseMapper()
+              .withRowKeyField("serialNumber")
+              .withColumnFields(new Fields("deviceModel", "status", "state", "internalTemp", "signalStrength"))
+              .withColumnFamily("deviceStatus");
+      
+      DelimitedRecordHiveMapper deviceStatusLogHiveMapper = new DelimitedRecordHiveMapper()
+    		  .withColumnFields(new Fields("deviceModel", "status", "state", "internalTemp", "signalStrength"));
+    		  //.withPartitionFields(new Fields("accounttype"));
+    		 
+      HiveOptions deviceStatusLogHiveOptions = new HiveOptions(constants.getHiveMetaStoreURI(),
+    				 							constants.getHiveDbName(),
+    				 							deviceLogTable,
+    				 							deviceStatusLogHiveMapper);
       
       //HBaseBolt hbasePersistTechnicianLocation = new HBaseBolt("TechnicianEvents", technicianLocationMapper).withConfigKey("hbase.conf");
   	  //builder.setSpout("DeviceSpout", new DeviceSpout());
@@ -145,6 +165,8 @@ public class DeviceMonitorTopology {
       builder.setBolt("PrintDeviceStatus", new PrintDeviceStatus(), 1).shuffleGrouping("DetectIncident", "DeviceStatusStream");
       builder.setBolt("PrintDeviceAlert", new PrintDeviceAlert(), 1).shuffleGrouping("DetectIncident", "DeviceAlertStream");
       builder.setBolt("DeviceLogHDFSBolt", deviceLogHdfsBolt, 1).shuffleGrouping("DetectIncident", "DeviceStatusLogStream");
+      builder.setBolt("DeviceLogHBaseBolt", new HBaseBolt("DeviceStatusLog", deviceStatusLogMapper).withConfigKey("hbase.conf"), 1).shuffleGrouping("DetectIncident", "DeviceStatusLogNullStream");
+      builder.setBolt("DeviceLogHiveBolt", new HiveBolt(deviceStatusLogHiveOptions),1).shuffleGrouping("DetectIncident", "DeviceStatusLogNullStream");
       builder.setBolt("PublishAlert", new PublishAlert(), 1).shuffleGrouping("PrintDeviceAlert");
       builder.setBolt("RecommendTechnician", new RecommendTechnician(), 1).shuffleGrouping("PrintDeviceAlert");
       builder.setBolt("RouteTechnician", new RouteTechnician(), 1).shuffleGrouping("RecommendTechnician");

@@ -1,6 +1,9 @@
 package com.hortonworks.bolts;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -41,6 +44,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 	private OutputCollector collector;
 	private Constants constants;
 	private HTable table = null;
+	private Connection conn;
 	
 	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
@@ -102,8 +106,45 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 			if (hbaseAdmin.tableExists(tableName)) {
 				table = new HTable(config, tableName);
 				System.out.println("********************** Acquired " + tableName);
+				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
 			}else{
 				System.out.println("********************** Table " + tableName + "does not exist, creating...");
+				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
+				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceDetailsBI\" "
+						+ "(\"SerialNumber\" VARCHAR NOT NULL PRIMARY KEY, "
+						+ "\"DeviceModel\" VARCHAR, "
+						+ "\"Latitude\" VARCHAR, "
+						+ "\"Longitude\" VARCHAR, "
+						+ "\"IpAddress\" VARCHAR, "
+						+ "\"Port\" VARCHAR, ");
+				conn.commit();
+				
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
+						+ "('Motorolla', "
+						+ "'39.951694', "
+						+ "'-75.144596', "
+						+ "'192.168.56.1', "
+						+ "'8085')");
+				conn.commit();
+				
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
+						+ "('Motorolla', "
+						+ "'39.951694', "
+						+ "'-75.144596', "
+						+ "'192.168.56.1', "
+						+ "'8087')");
+				conn.commit();
+				
+				conn.createStatement().executeUpdate("UPSERT INTO \"DeviceDetailsBI\" "
+						+ "('Motorolla', "
+						+ "'39.951694', "
+						+ "'-75.144596', "
+						+ "'192.168.56.1', "
+						+ "'8089')");
+				conn.commit();
+				
 				HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
 				HColumnDescriptor cfColumnFamily = new HColumnDescriptor("cf".getBytes());
 		        tableDescriptor.addFamily(cfColumnFamily);
@@ -113,6 +154,10 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 		        System.out.println("********************** Acquired " + tableName);
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
