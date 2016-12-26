@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import com.hortonworks.events.DeviceAlert;
@@ -44,6 +48,7 @@ public class IncidentDetector extends BaseRichBolt {
 	public void execute(Tuple tuple) {
 		STBStatus deviceStatus = (STBStatus) tuple.getValueByField("DeviceStatus");
 		collector.emit("DeviceStatusLogStream", new Values(deviceStatus.getSerialNumber(), deviceStatus.getDeviceModel(), deviceStatus.getStatus(), deviceStatus.getState(), deviceStatus.getInternalTemp(), deviceStatus.getSignalStrength()));
+		
 		if(deviceStatus.getSignalStrength() <= 70){
 			DeviceAlert signalStrengthAlert = new DeviceAlert();
 			signalStrengthAlert.setAlertDescription("Signal Strength is too low");
@@ -66,14 +71,23 @@ public class IncidentDetector extends BaseRichBolt {
 		}
 		
 		try {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+			Date date = new Date();
+			String str = dateFormat.format(date);
+			Date newDate = dateFormat.parse(str);
+			long currentEpochDate = newDate.getTime();
 			conn.createStatement().executeUpdate("UPSERT INTO \"DeviceStatusLog\" VALUES("
+					+ "'"+deviceStatus.getSerialNumber()+currentEpochDate+"', "
 					+ "'"+deviceStatus.getSerialNumber()+"', "
 					+ "'"+deviceStatus.getStatus()+"', "
 					+ "'"+deviceStatus.getState()+"', "
 					+ ""+deviceStatus.getInternalTemp()+", "
-					+ ""+deviceStatus.getSignalStrength()+")");
+					+ ""+deviceStatus.getSignalStrength()+", "
+					+ ""+currentEpochDate+")");
 			conn.commit();
 		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
@@ -103,19 +117,22 @@ public class IncidentDetector extends BaseRichBolt {
 				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
 				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
 			}else{
-				System.out.println("********************** Table " + tableName + "does not exist, creating...");
+				System.out.println("********************** Table " + tableName + " does not exist, creating...");
 				Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
 				conn = DriverManager.getConnection("jdbc:phoenix:"+ constants.getZkHost() + ":" + constants.getZkPort() + ":" + constants.getZkHBasePath());
 				conn.createStatement().execute("CREATE TABLE IF NOT EXISTS \"DeviceStatusLog\" ("
-						+ "\"serialNumber\" VARCHAR PRIMARY KEY, "
+						+ "\"pk\" VARCHAR PRIMARY KEY, "
+						+ "\"serialNumber\" VARCHAR, "
 						+ "\"state\" VARCHAR, "
 						+ "\"status\" VARCHAR, "
 						+ "\"internalTemp\" INTEGER, "
-						+ "\"signalStrength\" INTEGER)");
+						+ "\"signalStrength\" INTEGER, "
+						+ "\"timeStamp\" BIGINT)");
 				conn.commit();
 				
 		        System.out.println("********************** Created " + tableName);
 		        System.out.println("********************** Acquired " + tableName);
+		        hbaseAdmin.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
