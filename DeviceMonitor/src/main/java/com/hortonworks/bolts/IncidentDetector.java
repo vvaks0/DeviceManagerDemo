@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
@@ -71,23 +72,16 @@ public class IncidentDetector extends BaseRichBolt {
 		}
 		
 		try {
-			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-			Date date = new Date();
-			String str = dateFormat.format(date);
-			Date newDate = dateFormat.parse(str);
-			long currentEpochDate = newDate.getTime();
 			conn.createStatement().executeUpdate("UPSERT INTO \"DeviceStatusLog\" VALUES("
-					+ "'"+deviceStatus.getSerialNumber()+currentEpochDate+"', "
+					+ "'"+deviceStatus.getSerialNumber()+Instant.now().toEpochMilli()+"', "
 					+ "'"+deviceStatus.getSerialNumber()+"', "
 					+ "'"+deviceStatus.getStatus()+"', "
 					+ "'"+deviceStatus.getState()+"', "
 					+ ""+deviceStatus.getInternalTemp()+", "
 					+ ""+deviceStatus.getSignalStrength()+", "
-					+ ""+currentEpochDate+")");
+					+ ""+Instant.now().toEpochMilli()+")");
 			conn.commit();
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
