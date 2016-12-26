@@ -46,7 +46,6 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 	private HTable table = null;
 	private Connection conn;
 	
-	@SuppressWarnings("deprecation")
 	public void execute(Tuple tuple) {
 		STBStatus deviceStatus = (STBStatus) tuple.getValueByField("DeviceStatus");
 		
@@ -85,6 +84,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 		System.out.println(deviceStatus.getSignalStrength());*/
 	}
 
+	@SuppressWarnings("deprecation")
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this.constants = new Constants();
 		
@@ -156,6 +156,7 @@ public class EnrichDeviceStatus extends BaseRichBolt {
 		        table = new HTable(config, tableName);
 		        System.out.println("********************** Acquired " + tableName);
 			}
+			hbaseAdmin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
