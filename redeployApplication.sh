@@ -95,7 +95,7 @@ spark-submit --class com.hortonworks.util.SparkPhoenixETL --master yarn-client -
 
 # Redeploy Storm Topology to send topology meta data to Atlas
 echo "*********************************Redeploying Storm Topology..."
-storm kill DeviceMonitorTopology
+storm kill DeviceMonitorTopology $CLUSTER_NAME
 
 curl -u admin:admin -X DELETE 'http://'"$ATLAS_HOST:$ATLAS_PORT"'/api/atlas/entities?type=storm_topology&property=qualifiedName&value=DeviceMonitorTopology'
 
