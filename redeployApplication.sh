@@ -43,40 +43,49 @@ PAYLOAD=$(echo "{\"id\":\"$REPORTING_TASK_ID\",\"revision\":{\"version\":1},\"co
 	sleep 1
 }
 
-recreateTransactionHistoryTable () {
-	HQL="DROP TABLE TransactionHistory;"
-	# CREATE Customer Transaction History Table
+recreateDeviceManagerTables () {	
+	HQL="CREATE TABLE IF NOT EXISTS telecom_device_status_log_$CLUSTER_NAME (
+			serialNumber string, 
+			status string, 
+			state string, 
+			internalTemp int, 
+			signalStrength int, 
+			timeStamp bigint) 
+		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
+	
+	# CREATE DEVICE STATUS LOG TABLE
 	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive
 	
-	HQL="CREATE TABLE IF NOT EXISTS TransactionHistory ( accountNumber String,
-                                                    fraudulent String,
-                                                    merchantId String,
-                                                    merchantType String,
-                                                    amount Int,
-                                                    currency String,
-                                                    isCardPresent String,
-                                                    latitude Double,
-                                                    longitude Double,
-                                                    transactionId String,
-                                                    transactionTimeStamp String,
-                                                    distanceFromHome Double,                                                                          
-                                                    distanceFromPrev Double)
-	COMMENT 'Customer Credit Card Transaction History'
-	PARTITIONED BY (accountType String)
-	CLUSTERED BY (merchantType) INTO 30 BUCKETS
-	STORED AS ORC;"
+	HQL="CREATE TABLE IF NOT EXISTS telecom_device_details_$CLUSTER_NAME (
+			serialNumber string, 
+			deviceModel string, 
+			latitude string, 
+			longitude string, 
+			ipAddress string, 
+			port string) 
+		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
 	
-	# CREATE Customer Transaction History Table
-	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive
+	# CREATE DEVICE DETAILS TABLE
+	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive	
 }
 
 #cd $ROOT_PATH/DataPlaneUtils
 #mvn clean package
 #java -jar target/DataPlaneUtils-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
-# Recreate TransactionHistory table to reset Atlas qualified name to this cluster
-#echo "*********************************Recreating TransactionHistory Table..."
-#recreateTransactionHistoryTable
+echo "*********************************Configure HDFS application space..."
+export HADOOP_USER_NAME=hdfs
+hadoop fs -mkdir /user/root
+hadoop fs -chown root:hdfs /user/root
+hadoop fs -mkdir /spark-history
+hadoop fs -chown spark:hdfs /spark-history
+hadoop fs -chmod 777 /spark-history
+
+# Recreate Device Manager tables to reset Atlas qualified name to this cluster
+echo "*********************************Recreating Device Manager Tables..."
+recreateDeviceManagerTables
+
+spark-submit --class com.hortonworks.util.SparkPhoenixETL --master yarn-client --executor-cores 2 --driver-memory 2G --executor-memory 2G --num-executors 1 /home/spark/SparkPhoenixETL-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ZK_HOST:2181:/hbase-unsecure $CLUSTER_NAME DeviceManager
 
 # Redeploy Storm Topology to send topology meta data to Atlas
 echo "*********************************Redeploying Storm Topology..."
