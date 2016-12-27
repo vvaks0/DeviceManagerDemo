@@ -494,6 +494,12 @@ getHiveServerHost () {
         echo $HIVESERVER_HOST
 }
 
+getHiveInteractiveServerHost () {
+        HIVESERVER_INTERACTIVE_HOST=$(curl -u admin:admin -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/HIVE/components/HIVE_SERVER_INTERACTIVE|grep "host_name"|grep -Po ': "([a-zA-Z0-9\-_!?.]+)'|grep -Po '([a-zA-Z0-9\-_!?.]+)')
+
+        echo $HIVESERVER_INTERACTIVE_HOST
+}
+
 getHiveMetaStoreHost () {
         HIVE_METASTORE_HOST=$(curl -u admin:admin -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/HIVE/components/HIVE_METASTORE|grep "host_name"|grep -Po ': "([a-zA-Z0-9\-_!?.]+)'|grep -Po '([a-zA-Z0-9\-_!?.]+)')
 
@@ -523,6 +529,8 @@ NAMENODE_HOST=$(getNameNodeHost)
 export NAMENODE_HOST=$NAMENODE_HOST
 HIVESERVER_HOST=$(getHiveServerHost)
 export HIVESERVER_HOST=$HIVESERVER_HOST
+HIVESERVER_INTERACTIVE_HOST=$(getHiveInteractiveServerHost)
+export HIVESERVER_INTERACTIVE_HOST=$HIVESERVER_INTERACTIVE_HOST
 HIVE_METASTORE_HOST=$(getHiveMetaStoreHost)
 export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST
 HIVE_METASTORE_URI=thrift://$HIVE_METASTORE_HOST:9083
