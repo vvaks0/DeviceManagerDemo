@@ -50,7 +50,7 @@ recreateDeviceManagerTables () {
 			state string, 
 			internalTemp int, 
 			signalStrength int, 
-			timeStamp bigint) 
+			eventTimeStamp bigint) 
 		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
 	
 	# CREATE DEVICE STATUS LOG TABLE
@@ -93,7 +93,7 @@ storm kill DeviceMonitorTopology
 
 curl -u admin:admin -X DELETE 'http://'"$ATLAS_HOST:$ATLAS_PORT"'/api/atlas/entities?type=storm_topology&property=qualifiedName&value=DeviceMonitorTopology'
 
-storm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.topology.DeviceMonitorTopology
+storm jar /home/storm/DeviceMonitor-0.0.1-SNAPSHOT.jar com.hortonworks.iot.topology.DeviceMonitorTopology $CLUSTER_NAME
 
 # Start Nifi Flow Reporter to send flow meta data to Atlas
 echo "*********************************Retargeting Nifi Flow Reporting Task..."

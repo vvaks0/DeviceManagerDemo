@@ -433,16 +433,30 @@ configureYarnMemory () {
 	fi	
 }
 
-createDeviceEventTable () {
-	HIVESERVER_HOST=$(getHiveServerHost)
-	HQL="CREATE TABLE IF NOT EXISTS device_event_history ( )
-	COMMENT 'History of device health events'
-	PARTITIONED BY ()
-	CLUSTERED BY () INTO 30 BUCKETS
-	STORED AS ORC;"
+createDeviceManagerTables () {	
+	HQL="CREATE TABLE IF NOT EXISTS telecom_device_status_log_$CLUSTER_NAME (
+			serialNumber string, 
+			status string, 
+			state string, 
+			internalTemp int, 
+			signalStrength int, 
+			eventTimeStamp bigint) 
+		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
 	
-	# CREATE Customer Transaction History Table
-	beeline -u jdbc:hive2://$HIVESERVER_HOST:10000/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL"
+	# CREATE DEVICE STATUS LOG TABLE
+	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive
+	
+	HQL="CREATE TABLE IF NOT EXISTS telecom_device_details_$CLUSTER_NAME (
+			serialNumber string, 
+			deviceModel string, 
+			latitude string, 
+			longitude string, 
+			ipAddress string, 
+			port string) 
+		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
+	
+	# CREATE DEVICE DETAILS TABLE
+	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive	
 }
 
 getNameNodeHost () {
@@ -785,6 +799,9 @@ echo "*********************************Downloading Docker Images for UI..."
 service docker start
 docker pull vvaks/mapui
 docker pull vvaks/cometd
+
+echo "*********************************Create Device Manager Hive Tables..."
+createDeviceManagerTables
 
 echo "*********************************Checking Yarn and Phoenix Configurations..."
 configureYarnMemory
