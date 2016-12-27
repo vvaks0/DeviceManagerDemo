@@ -93,6 +93,22 @@ mv target/SparkPhoenixETL-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
 
 spark-submit --class com.hortonworks.util.SparkPhoenixETL --master yarn-client --executor-cores 2 --driver-memory 2G --executor-memory 2G --num-executors 1 /home/spark/SparkPhoenixETL-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ZK_HOST:2181:/hbase-unsecure $CLUSTER_NAME DeviceManager
 
+echo "*********************************Importing Spark Model..."
+cd DeviceManagerDemo/Model
+unzip nostradamusSVMModel.zip
+cp -rvf nostradamusSVMModel /tmp
+cp -vf DeviceLogTrainingData.csv /tmp
+hadoop fs -mkdir /demo/
+hadoop fs -mkdir /demo/data
+hadoop fs -mkdir /demo/data/model/
+hadoop fs -mkdir /demo/data/checkpoint
+hadoop fs -mkdir /demo/data/training/
+hadoop fs -chmod -R 777 /demo/data/
+hadoop fs -put /tmp/nostradamusSVMModel /demo/data/model/ 
+hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
+rm -Rvf /tmp/nostradamusSVMModel
+rm -vf /tmp/DeviceLogTrainingData.csv
+
 echo "*********************************Redeploying Spark Streaming Application..."
 nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master yarn-cluster --executor-cores 2 --driver-memory 2G --executor-memory 2G --num-executors 1 /home/spark/DeviceMonitorNostradamusScala-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ZK_HOST:2181 DeviceEvents $COMETD_HOST:8091 > /dev/null 2>&1&
 
