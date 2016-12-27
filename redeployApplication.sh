@@ -93,6 +93,9 @@ mv target/SparkPhoenixETL-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
 
 spark-submit --class com.hortonworks.util.SparkPhoenixETL --master yarn-client --executor-cores 2 --driver-memory 2G --executor-memory 2G --num-executors 1 /home/spark/SparkPhoenixETL-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ZK_HOST:2181:/hbase-unsecure $CLUSTER_NAME DeviceManager
 
+echo "*********************************Redeploying Spark Streaming Application..."
+nohup spark-submit --class com.hortonworks.iot.spark.streaming.SparkNostradamus --master yarn-cluster --executor-cores 2 --driver-memory 2G --executor-memory 2G --num-executors 1 /home/spark/DeviceMonitorNostradamusScala-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ZK_HOST:2181 DeviceEvents $COMETD_HOST:8091 > /dev/null 2>&1&
+
 # Redeploy Storm Topology to send topology meta data to Atlas
 echo "*********************************Redeploying Storm Topology..."
 storm kill DeviceMonitorTopology $CLUSTER_NAME
