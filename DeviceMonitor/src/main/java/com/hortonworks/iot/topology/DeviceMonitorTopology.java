@@ -81,11 +81,11 @@ public class DeviceMonitorTopology {
      TopologyBuilder builder = new TopologyBuilder();
      Constants constants = new Constants();
      String hostClusterName = null; 
-     String deviceLogTable = "device_status_log";
+     String deviceLogTable = "telecom_device_status_log";
      if(args[0] != null){
      	hostClusterName = args[0];
     	topologyName = "DeviceMonitorTopology-"+hostClusterName;
-    	deviceLogTable = "device_status_log_"+hostClusterName;
+    	deviceLogTable = "telecom_device_status_log_"+hostClusterName;
      }
      // Use pipe as record boundary
   	  RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter(",");
