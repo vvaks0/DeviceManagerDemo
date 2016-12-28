@@ -448,7 +448,7 @@ createDeviceManagerTables () {
 		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
 	
 	# CREATE DEVICE STATUS LOG TABLE
-	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive
+	beeline -u jdbc:hive2://$HIVESERVER_HOST:10000/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive
 	
 	HQL="CREATE TABLE IF NOT EXISTS telecom_device_details_$CLUSTER_NAME (
 			serialNumber string, 
@@ -460,7 +460,7 @@ createDeviceManagerTables () {
 		CLUSTERED BY (serialNumber) INTO 30 BUCKETS STORED AS ORC;"
 	
 	# CREATE DEVICE DETAILS TABLE
-	beeline -u jdbc:hive2://$HIVESERVER_HOST:$HIVESERVER_PORT/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive	
+	beeline -u jdbc:hive2://$HIVESERVER_HOST:10000/default -d org.apache.hive.jdbc.HiveDriver -e "$HQL" -n hive	
 }
 
 getNameNodeHost () {
@@ -647,8 +647,8 @@ hadoop fs -mkdir /demo/data/training/
 hadoop fs -chmod -R 777 /demo/data/
 hadoop fs -put /tmp/nostradamusSVMModel /demo/data/model/ 
 hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
-rm -Rvf /tmp/nostradamusSVMModel
-rm -vf /tmp/DeviceLogTrainingData.csv
+#rm -Rvf /tmp/nostradamusSVMModel
+#rm -vf /tmp/DeviceLogTrainingData.csv
 
 NIFI_SERVICE_PRESENT=$(serviceExists NIFI)
 if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
