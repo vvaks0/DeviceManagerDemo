@@ -534,17 +534,6 @@ getNifiHost () {
        	echo $NIFI_HOST
 }
 
-echo "*********************************Waiting for cluster install to complete..."
-waitForServiceToStart YARN
-
-waitForServiceToStart HDFS
-
-waitForServiceToStart HIVE
-
-waitForServiceToStart ZOOKEEPER
-
-sleep 10
-
 if [ ! -d "/usr/jdk64" ]; then
 	echo "*********************************Install and Enable Oracle JDK 8"
 	wget http://public-repo-1.hortonworks.com/ARTIFACTS/jdk-8u77-linux-x64.tar.gz
@@ -555,12 +544,6 @@ if [ ! -d "/usr/jdk64" ]; then
 	alternatives --install /usr/bin/jar jar /usr/jdk64/bin/jar 3
 	export JAVA_HOME=/usr/jdk64
 	echo "export JAVA_HOME=/usr/jdk64" >> /etc/bashrc
-fi
-
-if [[ -d "/usr/hdp/current/atlas-server"  && ! -d "/usr/hdp/current/atlas-client" ]]; then 
-echo "*********************************Only Atlas Server installed, setting symbolic link"
-	ln -s /usr/hdp/current/atlas-server /usr/hdp/current/atlas-client
-	ln -s /usr/hdp/current/atlas-server/conf/application.properties /usr/hdp/current/atlas-client/conf/atlas-application.properties
 fi
 
 export AMBARI_HOST=$(hostname -f)
@@ -585,7 +568,23 @@ echo "*********************************HDP VERSION IS: $VERSION"
 export HADOOP_USER_NAME=hdfs
 echo "*********************************HADOOP_USER_NAME set to HDFS"
 
-export JAVA_HOME=/usr/jdk64
+echo "*********************************Waiting for cluster install to complete..."
+waitForServiceToStart YARN
+
+waitForServiceToStart HDFS
+
+waitForServiceToStart HIVE
+
+waitForServiceToStart ZOOKEEPER
+
+sleep 10
+
+if [[ -d "/usr/hdp/current/atlas-server"  && ! -d "/usr/hdp/current/atlas-client" ]]; then 
+echo "*********************************Only Atlas Server installed, setting symbolic link"
+	ln -s /usr/hdp/current/atlas-server /usr/hdp/current/atlas-client
+	ln -s /usr/hdp/current/atlas-server/conf/application.properties /usr/hdp/current/atlas-client/conf/atlas-application.properties
+fi
+
 NAMENODE_HOST=$(getNameNodeHost)
 export NAMENODE_HOST=$NAMENODE_HOST
 HIVESERVER_HOST=$(getHiveServerHost)
