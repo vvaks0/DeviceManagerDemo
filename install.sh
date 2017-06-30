@@ -68,6 +68,30 @@ getServiceStatus () {
        	echo $SERVICE_STATUS
 }
 
+waitForAmbari () {
+       	# Wait for Ambari
+       	LOOPESCAPE="false"
+       	until [ "$LOOPESCAPE" == true ]; do
+        TASKSTATUS=$(curl -u admin:admin -I -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME | grep -Po 'OK')
+        if [ "$TASKSTATUS" == OK ]; then
+                LOOPESCAPE="true"
+                TASKSTATUS="READY"
+        else
+               	AUTHSTATUS=$(curl -u admin:admin -I -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME | grep HTTP | grep -Po '( [0-9]+)'| grep -Po '([0-9]+)')
+               	if [ "$AUTHSTATUS" == 403 ]; then
+               	echo "THE AMBARI PASSWORD IS NOT SET TO: admin"
+               	echo "RUN COMMAND: ambari-admin-password-reset, SET PASSWORD: admin"
+               	exit 403
+               	else
+                TASKSTATUS="PENDING"
+               	fi
+       	fi
+       	echo "Waiting for Ambari..."
+        echo "Ambari Status... " $TASKSTATUS
+        sleep 2
+       	done
+}
+
 waitForService () {
        	# Ensure that Service is not in a transitional state
        	SERVICE=$1
@@ -151,19 +175,6 @@ startService (){
         echo "*********************************$SERVICE Service Started..."
        	elif [ "$SERVICE_STATUS" == STARTED ]; then
        	echo "*********************************$SERVICE Service Started..."
-       	fi
-}
-
-getLatestNifiBits () {
-       	if [ "$INTVERSION" -gt 24 ]; then
-       		echo "*********************************Removing Current Version of NIFI..."
-       		rm -rf /var/lib/ambari-server/resources/stacks/HDP/$VERSION/services/NIFI
-
-       		echo "*********************************Downloading Newest Version of NIFI..."
-       		git clone https://github.com/abajwa-hw/ambari-nifi-service.git  /var/lib/ambari-server/resources/stacks/HDP/$VERSION/services/NIFI
-       		
-       		echo "*********************************Restarting Ambari..."
-			ambari-server restart
        	fi
 }
 
@@ -534,6 +545,102 @@ getNifiHost () {
        	echo $NIFI_HOST
 }
 
+installNifiService () {
+       	echo "*********************************Creating NIFI service..."
+       	# Create NIFI service
+       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI
+
+       	sleep 2
+       	echo "*********************************Adding NIFI MASTER component..."
+       	# Add NIFI Master component to service
+       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI/components/NIFI_MASTER
+		curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI/components/NIFI_CA
+		
+       	sleep 2
+       	echo "*********************************Creating NIFI configuration..."
+
+       	# Create and apply configuration
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-config $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-ambari-config.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-ssl-config $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-ambari-ssl-config.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-authorizers-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-authorizers-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-bootstrap-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-notification-services-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-bootstrap-notification-services-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-flow-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-flow-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-login-identity-providers-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-login-identity-providers-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-node-logback-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-node-logback-env.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-properties $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-properties.json
+
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-state-management-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-state-management-env.json
+		
+       	echo "*********************************Adding NIFI MASTER role to Host..."
+       	# Add NIFI Master role to Ambari Host
+       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$AMBARI_HOST/host_components/NIFI_MASTER
+
+       	echo "*********************************Adding NIFI CA role to Host..."
+		# Add NIFI CA role to Ambari Host
+       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$AMBARI_HOST/host_components/NIFI_CA
+
+       	sleep 30
+       	echo "*********************************Installing NIFI Service"
+       	# Install NIFI Service
+       	TASKID=$(curl -u admin:admin -H "X-Requested-By:ambari" -i -X PUT -d '{"RequestInfo": {"context" :"Install Nifi"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "INSTALLED"}}}' http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI | grep "id" | grep -Po '([0-9]+)')
+		
+		sleep 2       	
+       	if [ -z $TASKID ]; then
+       		until ! [ -z $TASKID ]; do
+       			TASKID=$(curl -u admin:admin -H "X-Requested-By:ambari" -i -X PUT -d '{"RequestInfo": {"context" :"Install Nifi"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "INSTALLED"}}}' http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI | grep "id" | grep -Po '([0-9]+)')
+       		 	echo "*********************************AMBARI TaskID " $TASKID
+       		done
+       	fi
+       	
+       	echo "*********************************AMBARI TaskID " $TASKID
+       	sleep 2
+       	LOOPESCAPE="false"
+       	until [ "$LOOPESCAPE" == true ]; do
+               	TASKSTATUS=$(curl -u admin:admin -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/requests/$TASKID | grep "request_status" | grep -Po '([A-Z]+)')
+               	if [ "$TASKSTATUS" == COMPLETED ]; then
+                       	LOOPESCAPE="true"
+               	fi
+               	echo "*********************************Task Status" $TASKSTATUS
+               	sleep 2
+       	done
+}
+
+waitForNifiServlet () {
+       	LOOPESCAPE="false"
+       	until [ "$LOOPESCAPE" == true ]; do
+       		TASKSTATUS=$(curl -u admin:admin -i -X GET http://$AMBARI_HOST:9090/nifi-api/controller | grep -Po 'OK')
+       		if [ "$TASKSTATUS" == OK ]; then
+               		LOOPESCAPE="true"
+       		else
+               		TASKSTATUS="PENDING"
+       		fi
+       		echo "*********************************Waiting for NIFI Servlet..."
+       		echo "*********************************NIFI Servlet Status... " $TASKSTATUS
+       		sleep 2
+       	done
+}
+
+instalHDFManagementPack () {
+	wget http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-453.tar.gz
+ambari-server install-mpack --mpack=hdf-ambari-mpack-3.0.0.0-453.tar.gz --verbose
+
+	sleep 2
+	ambari-server restart
+	waitForAmbari
+	sleep 2
+}
+
 if [ ! -d "/usr/jdk64" ]; then
 	echo "*********************************Install and Enable Oracle JDK 8"
 	wget http://public-repo-1.hortonworks.com/ARTIFACTS/jdk-8u77-linux-x64.tar.gz
@@ -584,6 +691,10 @@ echo "*********************************Only Atlas Server installed, setting symb
 	ln -s /usr/hdp/current/atlas-server /usr/hdp/current/atlas-client
 	ln -s /usr/hdp/current/atlas-server/conf/application.properties /usr/hdp/current/atlas-client/conf/atlas-application.properties
 fi
+
+echo "*********************************Install HDF Management Pack..."
+instalHDFManagementPack 
+sleep 2
 
 NAMENODE_HOST=$(getNameNodeHost)
 export NAMENODE_HOST=$NAMENODE_HOST
@@ -671,14 +782,6 @@ mvn clean package
 cp target/DeviceMonitorNostradamusScala-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
 cd $ROOT_PATH
 
-#Build Device Simulator from source
-#echo "*********************************Building Simulator"
-#git clone https://github.com/vakshorton/DataSimulators.git
-#cd $ROOT_PATH/DataSimulators/DeviceSimulator
-#mvn clean package
-#cp -vf target/DeviceSimulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar $ROOT_PATH
-#cd $ROOT_PATH
-
 # Build from source
 echo "*********************************Building Nifi Atlas Reporter"
 git clone https://github.com/vakshorton/NifiAtlasBridge.git
@@ -705,10 +808,14 @@ hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
 #rm -Rvf /tmp/nostradamusSVMModel
 #rm -vf /tmp/DeviceLogTrainingData.csv
 
+git clone https://github.com/vakshorton/CloudBreakArtifacts
+sleep 2
+installNifiService
+sleep 2
+
 NIFI_SERVICE_PRESENT=$(serviceExists NIFI)
 if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
        	echo "*********************************NIFI Service Not Present, Installing..."
-       	getLatestNifiBits
        	waitForAmbari
        	installNifiService
        	
@@ -727,18 +834,6 @@ if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
 		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /opt/$NIFI_HOME/lib
        	
        	startService NIFI
-else
-       	echo "*********************************NIFI Service Already Installed"
-		echo "*********************************Install Nifi Atlas Reporter..."
-		stopService NIFI
-		NIFI_HOME=$(ls /opt/|grep nifi)
-		if [ -z "$NIFI_HOME" ]; then
-        	NIFI_HOME=$(ls /opt/|grep HDF)
-		fi
-		export NIFI_HOME
-		cp -vf  $ROOT_PATH/NifiAtlasLineageReporter/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /opt/$NIFI_HOME/lib
-		sleep 2
-		startService NIFI
 fi
 
 NIFI_STATUS=$(getServiceStatus NIFI)
