@@ -202,65 +202,6 @@ waitForAmbari () {
        	done
 }
 
-installNifiService () {
-       	echo "*********************************Creating NIFI service..."
-       	# Create NIFI service
-       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI
-
-       	sleep 2
-       	echo "*********************************Adding NIFI MASTER component..."
-       	# Add NIFI Master component to service
-       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI/components/NIFI_MASTER
-
-       	sleep 2
-       	echo "*********************************Creating NIFI configuration..."
-
-       	# Create and apply configuration
-       	#sleep 2
-		if [ "$INTVERSION" -gt 24 ]; then
-			/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-env $ROOT_PATH/Nifi/config/nifi-env.json
-		else	
-			/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-logback-env $ROOT_PATH/Nifi/config/nifi-logback-env.json
-		fi
-		sleep 2
-       	/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-config $ROOT_PATH/Nifi/config/nifi-ambari-config.json
-       	sleep 2
-       	/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-env $ROOT_PATH/Nifi/config/nifi-bootstrap-env.json
-       	sleep 2
-       	/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-flow-env $ROOT_PATH/Nifi/config/nifi-flow-env.json
-       	sleep 2
-       	/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-properties-env $ROOT_PATH/Nifi/config/nifi-properties-env.json
-       	sleep 2
-       	echo "*********************************Adding NIFI MASTER role to Host..."
-       	# Add NIFI Master role to Sandbox host
-       	curl -u admin:admin -H "X-Requested-By:ambari" -i -X POST http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/hosts/$AMBARI_HOST/host_components/NIFI_MASTER
-
-       	sleep 30
-       	echo "*********************************Installing NIFI Service"
-       	# Install NIFI Service
-       	TASKID=$(curl -u admin:admin -H "X-Requested-By:ambari" -i -X PUT -d '{"RequestInfo": {"context" :"Install Nifi"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "INSTALLED"}}}' http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI | grep "id" | grep -Po '([0-9]+)')
-		
-		sleep 2       	
-       	if [ -z $TASKID ]; then
-       		until ! [ -z $TASKID ]; do
-       			TASKID=$(curl -u admin:admin -H "X-Requested-By:ambari" -i -X PUT -d '{"RequestInfo": {"context" :"Install Nifi"}, "Body": {"ServiceInfo": {"maintenance_state" : "OFF", "state": "INSTALLED"}}}' http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/services/NIFI | grep "id" | grep -Po '([0-9]+)')
-       		 	echo "*********************************AMBARI TaskID " $TASKID
-       		done
-       	fi
-       	
-       	echo "*********************************AMBARI TaskID " $TASKID
-       	sleep 2
-       	LOOPESCAPE="false"
-       	until [ "$LOOPESCAPE" == true ]; do
-               	TASKSTATUS=$(curl -u admin:admin -X GET http://$AMBARI_HOST:8080/api/v1/clusters/$CLUSTER_NAME/requests/$TASKID | grep "request_status" | grep -Po '([A-Z]+)')
-               	if [ "$TASKSTATUS" == COMPLETED ]; then
-                       	LOOPESCAPE="true"
-               	fi
-               	echo "*********************************Task Status" $TASKSTATUS
-               	sleep 2
-       	done
-}
-
 waitForNifiServlet () {
        	LOOPESCAPE="false"
        	until [ "$LOOPESCAPE" == true ]; do
@@ -276,10 +217,8 @@ waitForNifiServlet () {
        	done
 }
 
-
 deployTemplateToNifi () {
 	echo "*********************************Importing NIFI Template..."		
-	if [ "$INTVERSION" -gt 24 ]; then
        	# Import NIFI Template HDF 2.x
        	TEMPLATEID=$(curl -v -F template=@"$ROOT_PATH/Nifi/template/DeviceManagerDemo.xml" -X POST http://$AMBARI_HOST:9090/nifi-api/process-groups/root/templates/upload | grep -Po '<id>([a-z0-9-]+)' | grep -Po '>([a-z0-9-]+)' | grep -Po '([a-z0-9-]+)')
 		sleep 1
@@ -300,25 +239,13 @@ deployTemplateToNifi () {
 		
 		sleep 1
 		curl -d $PAYLOAD  -H "Content-Type: application/json" -X PUT http://$AMBARI_HOST:9090/nifi-api/process-groups/$ROOT_GROUP_ID
-	else
-       	 # Import NIFI Template HDF 1.x
-       	TEMPLATEID=$(curl -v -F template=@"$ROOT_PATH/Nifi/template/DeviceManagerDemo.xml" -X POST http://$AMBARI_HOST:9090/nifi-api/controller/templates | grep -Po '<id>([a-z0-9-]+)' | grep -Po '>([a-z0-9-]+)' | grep -Po '([a-z0-9-]+)')
-       	sleep 1		
-		
-		# Instantiate NIFI Template HDF 1.x
-		echo "*********************************Instantiating NIFI Flow..."
-		REVISION=$(curl -u admin:admin  -i -X GET http://$AMBARI_HOST:9090/nifi-api/controller/revision |grep -Po '\"version\":([0-9]+)' | grep -Po '([0-9]+)')
-		sleep 1
-		
-		curl -u admin:admin -i -H "Content-Type:application/x-www-form-urlencoded" -d "templateId=$TEMPLATEID&originX=100&originY=100&version=$REVISION" -X POST http://$AMBARI_HOST:9090/nifi-api/controller/process-groups/root/template-instance
-	fi
+
 	sleep 1
 }
 
 # Start NIFI Flow
 startNifiFlow () {
     echo "*********************************Starting NIFI Flow..."
-	if [ "$INTVERSION" -gt 24 ]; then	     
     	# Start NIFI Flow HDF 2.x
     	TARGETS=($(curl -u admin:admin -i -X GET http://$AMBARI_HOST:9090/nifi-api/process-groups/root/processors | grep -Po '\"uri\":\"([a-z0-9-://.]+)' | grep -Po '(?!.*\")([a-z0-9-://.]+)'))
        	length=${#TARGETS[@]}
@@ -351,21 +278,6 @@ startNifiFlow () {
        		
        		curl -u admin:admin -i -H "Content-Type:application/json" -d "${PAYLOAD}" -X PUT ${TARGETS[i]}
        	done
-	else       	
-       	# Start NIFI Flow HDF 1.x
-		echo "*********************************Starting NIFI Flow..."
-		REVISION=$(curl -u admin:admin  -i -X GET http://$AMBARI_HOST:9090/nifi-api/controller/revision |grep -Po '\"version\":([0-9]+)' | grep -Po '([0-9]+)')
-
-		TARGETS=($(curl -u admin:admin -i -X GET http://$AMBARI_HOST:9090/nifi-api/controller/process-groups/root/processors | grep -Po '\"uri\":\"([a-z0-9-://.]+)' | grep -Po '(?!.*\")([a-z0-9-://.]+)'))
-length=${#TARGETS[@]}
-
-		for ((i = 0; i != length; i++)); do
-   			echo curl -u admin:admin -i -X GET ${TARGETS[i]}
-   			echo "Current Revision: " $REVISION
-   			curl -u admin:admin -i -H "Content-Type:application/x-www-form-urlencoded" -d "state=RUNNING&version=$REVISION" -X PUT ${TARGETS[i]}
-		   REVISION=$(curl -u admin:admin  -i -X GET http://$AMBARI_HOST:9090/nifi-api/controller/revision |grep -Po '\"version\":([0-9]+)' | grep -Po '([0-9]+)')
-		done
-	fi
 }
 
 installDemoControl () {
@@ -733,10 +645,6 @@ export CONFIG_PATH=~/CloudBreakArtifacts
 cd $ROOT_PATH
 echo "*********************************CONFIG PATH IS: $CONFIG_PATH"
 
-export VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]\.[0-9]\).*/\1/'`
-export INTVERSION=$(echo $VERSION*10 | bc | grep -Po '([0-9][0-9])')
-echo "*********************************HDP VERSION IS: $VERSION"
-
 export HADOOP_USER_NAME=hdfs
 echo "*********************************HADOOP_USER_NAME set to HDFS"
 
@@ -750,6 +658,10 @@ waitForServiceToStart HIVE
 waitForServiceToStart ZOOKEEPER
 
 sleep 10
+
+export VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]\.[0-9]\).*/\1/'`
+export INTVERSION=$(echo $VERSION*10 | bc | grep -Po '([0-9][0-9])')
+echo "*********************************HDP VERSION IS: $VERSION"
 
 if [[ -d "/usr/hdp/current/atlas-server"  && ! -d "/usr/hdp/current/atlas-client" ]]; then 
 echo "*********************************Only Atlas Server installed, setting symbolic link"
