@@ -545,6 +545,64 @@ getNifiHost () {
        	echo $NIFI_HOST
 }
 
+captureEnvironment () {
+	NIFI_HOST=$(getNifiHost)
+	export NIFI_HOST=$NIFI_HOST
+	NAMENODE_HOST=$(getNameNodeHost)
+	export NAMENODE_HOST=$NAMENODE_HOST
+	HIVESERVER_HOST=$(getHiveServerHost)
+	export HIVESERVER_HOST=$HIVESERVER_HOST
+	HIVESERVER_INTERACTIVE_HOST=$(getHiveInteractiveServerHost)
+	export HIVESERVER_INTERACTIVE_HOST=$HIVESERVER_INTERACTIVE_HOST
+	HIVE_METASTORE_HOST=$(getHiveMetaStoreHost)
+	export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST
+	HIVE_METASTORE_URI=thrift://$HIVE_METASTORE_HOST:9083
+	export HIVE_METASTORE_URI=$HIVE_METASTORE_URI
+	ZK_HOST=$AMBARI_HOST
+	export ZK_HOST=$ZK_HOST
+	KAFKA_BROKER=$(getKafkaBroker)
+	export KAFKA_BROKER=$KAFKA_BROKER
+	ATLAS_HOST=$(getAtlasHost)
+	export ATLAS_HOST=$ATLAS_HOST
+	COMETD_HOST=$AMBARI_HOST
+	export COMETD_HOST=$COMETD_HOST
+	env
+	
+	echo "export NIFI_HOST=$NIFI_HOST" >> /etc/bashrc
+	echo "export NAMENODE_HOST=$NAMENODE_HOST" >> /etc/bashrc
+	echo "export ZK_HOST=$ZK_HOST" >> /etc/bashrc
+	echo "export KAFKA_BROKER=$KAFKA_BROKER" >> /etc/bashrc
+	echo "export ATLAS_HOST=$ATLAS_HOST" >> /etc/bashrc
+	echo "export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST" >> /etc/bashrc
+	echo "export HIVE_METASTORE_URI=$HIVE_METASTORE_URI" >> /etc/bashrc
+	echo "export COMETD_HOST=$COMETD_HOST" >> /etc/bashrc
+
+	echo "export NIFI_HOST=$NIFI_HOST" >> ~/.bash_profile
+	echo "export NAMENODE_HOST=$NAMENODE_HOST" >> ~/.bash_profile
+	echo "export ZK_HOST=$ZK_HOST" >> ~/.bash_profile
+	echo "export KAFKA_BROKER=$KAFKA_BROKER" >> ~/.bash_profile
+	echo "export ATLAS_HOST=$ATLAS_HOST" >> ~/.bash_profile
+	echo "export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST" >> ~/.bash_profile
+	echo "export HIVE_METASTORE_URI=$HIVE_METASTORE_URI" >> ~/.bash_profile
+	echo "export COMETD_HOST=$COMETD_HOST" >> ~/.bash_profile
+
+	. ~/.bash_profile
+}
+
+installNifiAtlasReporter () {
+	echo "*********************************Building Nifi Atlas Reporter"
+	git clone https://github.com/vakshorton/NifiAtlasBridge.git
+	cd $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask
+	mvn clean install
+	cd $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask
+	mvn clean install
+	cd $ROOT_PATH
+	
+	echo "*********************************Install Nifi Atlas Reporters..."
+	mv -vf $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask/target/NifiAtlasFlowReportingTask-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
+	mv -vf $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
+}
+
 installNifiService () {
        	echo "*********************************Creating NIFI service..."
        	# Create NIFI service
@@ -560,27 +618,27 @@ installNifiService () {
        	echo "*********************************Creating NIFI configuration..."
 
        	# Create and apply configuration
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-config $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-ambari-config.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-config $CONFIG_PATH/hdf-config/nifi-config/nifi-ambari-config.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-ssl-config $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-ambari-ssl-config.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-ambari-ssl-config $CONFIG_PATH/hdf-config/nifi-config/nifi-ambari-ssl-config.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-authorizers-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-authorizers-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-authorizers-env $CONFIG_PATH/hdf-config/nifi-config/nifi-authorizers-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-bootstrap-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-env $CONFIG_PATH/hdf-config/nifi-config/nifi-bootstrap-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-notification-services-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-bootstrap-notification-services-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-bootstrap-notification-services-env $CONFIG_PATH/hdf-config/nifi-config/nifi-bootstrap-notification-services-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-env $CONFIG_PATH/hdf-config/nifi-config/nifi-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-flow-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-flow-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-flow-env $CONFIG_PATH/hdf-config/nifi-config/nifi-flow-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-login-identity-providers-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-login-identity-providers-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-login-identity-providers-env $CONFIG_PATH/hdf-config/nifi-config/nifi-login-identity-providers-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-node-logback-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-node-logback-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-node-logback-env $CONFIG_PATH/hdf-config/nifi-config/nifi-node-logback-env.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-properties $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-properties.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-properties $CONFIG_PATH/hdf-config/nifi-config/nifi-properties.json
 
-		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-state-management-env $ROOT_PATH/CloudBreakArtifacts/hdf-config/nifi-config/nifi-state-management-env.json
+		/var/lib/ambari-server/resources/scripts/configs.sh set $AMBARI_HOST $CLUSTER_NAME nifi-state-management-env $CONFIG_PATH/hdf-config/nifi-config/nifi-state-management-env.json
 		
        	echo "*********************************Adding NIFI MASTER role to Host..."
        	# Add NIFI Master role to Ambari Host
@@ -668,6 +726,11 @@ fi
 export ROOT_PATH=$(pwd)
 echo "*********************************ROOT PATH IS: $ROOT_PATH"
 
+echo "*********************************Preparing HDF Artifacts..."
+git clone https://github.com/vakshorton/CloudBreakArtifacts ~
+export CONFIG_PATH=$(~/CloudBreakArtifacts)
+echo "*********************************CONFIG PATH IS: $CONFIG_PATH"
+
 export VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]\.[0-9]\).*/\1/'`
 export INTVERSION=$(echo $VERSION*10 | bc | grep -Po '([0-9][0-9])')
 echo "*********************************HDP VERSION IS: $VERSION"
@@ -692,54 +755,16 @@ echo "*********************************Only Atlas Server installed, setting symb
 	ln -s /usr/hdp/current/atlas-server/conf/application.properties /usr/hdp/current/atlas-client/conf/atlas-application.properties
 fi
 
+sleep 2
+
 echo "*********************************Install HDF Management Pack..."
 instalHDFManagementPack 
 sleep 2
 
-NAMENODE_HOST=$(getNameNodeHost)
-export NAMENODE_HOST=$NAMENODE_HOST
-HIVESERVER_HOST=$(getHiveServerHost)
-export HIVESERVER_HOST=$HIVESERVER_HOST
-HIVESERVER_INTERACTIVE_HOST=$(getHiveInteractiveServerHost)
-export HIVESERVER_INTERACTIVE_HOST=$HIVESERVER_INTERACTIVE_HOST
-HIVE_METASTORE_HOST=$(getHiveMetaStoreHost)
-export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST
-HIVE_METASTORE_URI=thrift://$HIVE_METASTORE_HOST:9083
-export HIVE_METASTORE_URI=$HIVE_METASTORE_URI
-ZK_HOST=$AMBARI_HOST
-export ZK_HOST=$ZK_HOST
-KAFKA_BROKER=$(getKafkaBroker)
-export KAFKA_BROKER=$KAFKA_BROKER
-ATLAS_HOST=$(getAtlasHost)
-export ATLAS_HOST=$ATLAS_HOST
-COMETD_HOST=$AMBARI_HOST
-export COMETD_HOST=$COMETD_HOST
-env
-
-echo "export NAMENODE_HOST=$NAMENODE_HOST" >> /etc/bashrc
-echo "export ZK_HOST=$ZK_HOST" >> /etc/bashrc
-echo "export KAFKA_BROKER=$KAFKA_BROKER" >> /etc/bashrc
-echo "export ATLAS_HOST=$ATLAS_HOST" >> /etc/bashrc
-echo "export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST" >> /etc/bashrc
-echo "export HIVE_METASTORE_URI=$HIVE_METASTORE_URI" >> /etc/bashrc
-echo "export COMETD_HOST=$COMETD_HOST" >> /etc/bashrc
-
-echo "export NAMENODE_HOST=$NAMENODE_HOST" >> ~/.bash_profile
-echo "export ZK_HOST=$ZK_HOST" >> ~/.bash_profile
-echo "export KAFKA_BROKER=$KAFKA_BROKER" >> ~/.bash_profile
-echo "export ATLAS_HOST=$ATLAS_HOST" >> ~/.bash_profile
-echo "export HIVE_METASTORE_HOST=$HIVE_METASTORE_HOST" >> ~/.bash_profile
-echo "export HIVE_METASTORE_URI=$HIVE_METASTORE_URI" >> ~/.bash_profile
-echo "export COMETD_HOST=$COMETD_HOST" >> ~/.bash_profile
-
-. ~/.bash_profile
-
 echo "*********************************Installing Utlities..."
 installUtils
-
-echo "*********************************Preparing HDF Artifacts..."
-git clone https://github.com/vakshorton/CloudBreakArtifacts $ROOT_PATH
 sleep 2
+
 echo "*********************************Installing NIFI..."
 installNifiService
 sleep 2
@@ -749,14 +774,10 @@ if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
        	echo "*********************************NIFI Service Not Present, Installing..."
        	waitForAmbari
        	installNifiService
-		
-		echo "*********************************Install Nifi Atlas Reporters..."
-		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask/target/NifiAtlasFlowReportingTask-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
-		
-		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
-       	
-       	startService NIFI
 fi
+
+installNifiAtlasReporter
+startService NIFI	 	
 
 NIFI_STATUS=$(getServiceStatus NIFI)
 echo "*********************************Checking NIFI status..."
@@ -772,12 +793,17 @@ else
        	echo "*********************************NIFI Service Started..."
 fi
 
-echo " 				 *****************Create /root HDFS folder for Slider..."
+sleep 2
+echo "*********************************Capturing Environment Data..."
+captureEnvironment
+sleep 2
+
+echo "*********************************Create /root HDFS folder for Slider..."
 hadoop fs -mkdir /user/root/
 hadoop fs -chown root:hdfs /user/root/
 
 #Create Docker working folder
-echo " 				  *****************Creating Docker Home Folder..."
+echo "*********************************Creating Docker Home Folder..."
 mkdir /home/docker/
 mkdir /home/docker/dockerbuild/
 mkdir /home/docker/dockerbuild/mapui
@@ -811,15 +837,6 @@ echo "*********************************Building Device Monitor Nostradamus Appli
 cd $ROOT_PATH/DeviceMonitorNostradamusScala
 mvn clean package
 cp target/DeviceMonitorNostradamusScala-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/spark
-cd $ROOT_PATH
-
-# Build from source
-echo "*********************************Building Nifi Atlas Reporter"
-git clone https://github.com/vakshorton/NifiAtlasBridge.git
-cd $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask
-mvn clean install
-cd $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask
-mvn clean install
 cd $ROOT_PATH
 
 #Import Spark Model
@@ -858,11 +875,6 @@ startNifiFlow
 cd $ROOT_PATH
 
 echo "*********************************Installing Demo Control Service ..."
-NIFI_HOST=$(getNifiHost)
-export NIFI_HOST=$NIFI_HOST
-echo "export NIFI_HOST=$NIFI_HOST" >> /etc/bashrc
-echo "export NIFI_HOST=$NIFI_HOST" >> ~/.bash_profile
-. ~/.bash_profile
 installDemoControl
 
 sleep 2
