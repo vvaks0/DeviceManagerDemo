@@ -737,7 +737,42 @@ echo "export COMETD_HOST=$COMETD_HOST" >> ~/.bash_profile
 echo "*********************************Installing Utlities..."
 installUtils
 
-echo " 				  *****************Create /root HDFS folder for Slider..."
+echo "*********************************Preparing HDF Artifacts..."
+git clone https://github.com/vakshorton/CloudBreakArtifacts $ROOT_PATH
+sleep 2
+echo "*********************************Installing NIFI..."
+installNifiService
+sleep 2
+
+NIFI_SERVICE_PRESENT=$(serviceExists NIFI)
+if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
+       	echo "*********************************NIFI Service Not Present, Installing..."
+       	waitForAmbari
+       	installNifiService
+		
+		echo "*********************************Install Nifi Atlas Reporters..."
+		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask/target/NifiAtlasFlowReportingTask-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
+		
+		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /usr/hdf/current/nifi/lib/
+       	
+       	startService NIFI
+fi
+
+NIFI_STATUS=$(getServiceStatus NIFI)
+echo "*********************************Checking NIFI status..."
+if ! [[ $NIFI_STATUS == STARTED || $NIFI_STATUS == INSTALLED ]]; then
+       	echo "*********************************NIFI is in a transitional state, waiting..."
+       	waitForService NIFI
+       	echo "*********************************NIFI has entered a ready state..."
+fi
+
+if [[ $NIFI_STATUS == INSTALLED ]]; then
+       	startService NIFI
+else
+       	echo "*********************************NIFI Service Started..."
+fi
+
+echo " 				 *****************Create /root HDFS folder for Slider..."
 hadoop fs -mkdir /user/root/
 hadoop fs -chown root:hdfs /user/root/
 
@@ -746,10 +781,6 @@ echo " 				  *****************Creating Docker Home Folder..."
 mkdir /home/docker/
 mkdir /home/docker/dockerbuild/
 mkdir /home/docker/dockerbuild/mapui
-
-#Create TransactionHistory Hive Table for Storm topology
-echo "*********************************Creating device_event_history Hive Table..."
-#createDeviceEventTable
 
 echo "*********************************Staging Slider Configurations..."
 cd $ROOT_PATH/SliderConfig
@@ -808,47 +839,9 @@ hadoop fs -put /tmp/DeviceLogTrainingData.csv /demo/data/training/
 #rm -Rvf /tmp/nostradamusSVMModel
 #rm -vf /tmp/DeviceLogTrainingData.csv
 
-git clone https://github.com/vakshorton/CloudBreakArtifacts
-sleep 2
-installNifiService
-sleep 2
-
-NIFI_SERVICE_PRESENT=$(serviceExists NIFI)
-if [[ "$NIFI_SERVICE_PRESENT" == 0 ]]; then
-       	echo "*********************************NIFI Service Not Present, Installing..."
-       	waitForAmbari
-       	installNifiService
-       	
-       	mkdir /var/run/nifi
-		chown nifi:nifi /var/run/nifi
-		
-		echo "*********************************Install Nifi Atlas Reporter..."
-		NIFI_HOME=$(ls /opt/|grep nifi)
-		if [ -z "$NIFI_HOME" ]; then
-        	NIFI_HOME=$(ls /opt/|grep HDF)
-		fi
-		export NIFI_HOME
-
-		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasFlowReportingTask/target/NifiAtlasFlowReportingTask-0.0.1-SNAPSHOT.nar /opt/$NIFI_HOME/lib
-		
-		mv -vf  $ROOT_PATH/NifiAtlasBridge/NifiAtlasLineageReportingTask/target/NifiAtlasLineageReporter-0.0.1-SNAPSHOT.nar /opt/$NIFI_HOME/lib
-       	
-       	startService NIFI
-fi
-
-NIFI_STATUS=$(getServiceStatus NIFI)
-echo "*********************************Checking NIFI status..."
-if ! [[ $NIFI_STATUS == STARTED || $NIFI_STATUS == INSTALLED ]]; then
-       	echo "*********************************NIFI is in a transitional state, waiting..."
-       	waitForService NIFI
-       	echo "*********************************NIFI has entered a ready state..."
-fi
-
-if [[ $NIFI_STATUS == INSTALLED ]]; then
-       	startService NIFI
-else
-       	echo "*********************************NIFI Service Started..."
-fi
+#Create TransactionHistory Hive Table for Storm topology
+#echo "*********************************Creating device_event_history Hive Table..."
+#createDeviceEventTable
 
 echo "*********************************Install GeoLite City DB for Nifi..."
 wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz -P /home/centos
