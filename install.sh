@@ -727,8 +727,10 @@ export ROOT_PATH=$(pwd)
 echo "*********************************ROOT PATH IS: $ROOT_PATH"
 
 echo "*********************************Preparing HDF Artifacts..."
-git clone https://github.com/vakshorton/CloudBreakArtifacts ~
-export CONFIG_PATH=$(~/CloudBreakArtifacts)
+cd ~
+git clone https://github.com/vakshorton/CloudBreakArtifacts
+export CONFIG_PATH=~/CloudBreakArtifacts
+cd $ROOT_PATH
 echo "*********************************CONFIG PATH IS: $CONFIG_PATH"
 
 export VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]\.[0-9]\).*/\1/'`
