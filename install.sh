@@ -663,6 +663,10 @@ export VERSION=`hdp-select status hadoop-client | sed 's/hadoop-client - \([0-9]
 export INTVERSION=$(echo $VERSION*10 | bc | grep -Po '([0-9][0-9])')
 echo "*********************************HDP VERSION IS: $VERSION"
 
+echo "*********************************Load Demo Control Service into Ambari"
+cd $ROOT_PATH
+cp -Rvf $ROOT_PATH/DEVICE_MANAGER_DEMO_CONTROL /var/lib/ambari-server/resources/stacks/HDP/$VERSION/services/
+
 if [[ -d "/usr/hdp/current/atlas-server"  && ! -d "/usr/hdp/current/atlas-client" ]]; then 
 echo "*********************************Only Atlas Server installed, setting symbolic link"
 	ln -s /usr/hdp/current/atlas-server /usr/hdp/current/atlas-client
@@ -731,10 +735,6 @@ cp -vf resources.json /home/docker/dockerbuild/mapui
 echo "*********************************Copy redeployApplication.sh to /root"
 cd $ROOT_PATH
 cp -Rvf $ROOT_PATH/redeployApplication.sh /root
-
-echo "*********************************Load Demo Control Service into Ambari"
-cd $ROOT_PATH
-cp -Rvf $ROOT_PATH/DEVICE_MANAGER_DEMO_CONTROL /var/lib/ambari-server/resources/stacks/HDP/$VERSION/services/
 
 echo "*********************************Load Data Plane Client Service into Ambari"
 git clone https://github.com/vakshorton/Utils
