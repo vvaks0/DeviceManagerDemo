@@ -214,6 +214,18 @@ div#command{
   					var internal_temp = message.data.internalTemp
   				}
   				
+  				if (typeof message.data.latitude === 'string' || message.data.latitude instanceof String){
+  					var latitude = parseFloat(message.data.latitude)
+  				}else{
+  					var latitude = message.data.latitude
+  				}
+  				
+  				if (typeof message.data.longitude === 'string' || message.data.longitude instanceof String){
+  					var longitude = parseFloat(message.data.longitude)
+  				}else{
+  					var longitude = message.data.longitude
+  				}
+  				
   				contentString = 'Serial Number: ' + serial_number + '<br>' +
   						'Device Model: ' + device_model + '<br>' + 
   						//'Device Status: ' + message.data.status + '<br>' +  
@@ -225,7 +237,7 @@ div#command{
   							//contentString = contentString + alert[message.data.deviceSerialNumber];
 
   						if(!markers[serial_number]){
-  							markers[serial_number] = new google.maps.Marker({position: {lat: message.data.latitude, lng: message.data.longitude}, map: map, icon: greenIcon}); 
+  							markers[serial_number] = new google.maps.Marker({position: {lat: latitude, lng: longitude}, map: map, icon: greenIcon}); 
   							markers[serial_number].setTitle(serial_number);
   							markerInfo[serial_number] = new google.maps.InfoWindow({content: contentString});
   							markerInfo[serial_number].setContent(contentString);
@@ -247,14 +259,26 @@ div#command{
   					var technician_id = message.data.technicianId
   				}
   				
+  				if (typeof message.data.latitude === 'string' || message.data.latitude instanceof String){
+  					var latitude = parseFloat(message.data.latitude)
+  				}else{
+  					var latitude = message.data.latitude
+  				}
+  				
+  				if (typeof message.data.longitude === 'string' || message.data.longitude instanceof String){
+  					var longitude = parseFloat(message.data.longitude)
+  				}else{
+  					var longitude = message.data.longitude
+  				}
+  				
   				contentString = 'Technician Name: ' + technician_id + '<br>' +
-					'Latitude: ' + message.data.latitude + '<br>' + 
-					'Longitude: ' + message.data.longitude + '<br>' + 
+					'Latitude: ' + latitude + '<br>' + 
+					'Longitude: ' + longitude + '<br>' + 
 					'Status: ' + message.data.status + '<br>';
   	        	if(!technicians[technician_id]){
   	        		technicians[technician_id] = new google.maps.Marker({position: {lat: lat, lng: lng}, map: map, icon: carIcon});
   	        		technicians[technician_id].setTitle(technician_id);
-  	        		technicians[technician_id].setPosition({lat: message.data.latitude, lng: message.data.longitude});
+  	        		technicians[technician_id].setPosition({lat: latitude, lng: longitude});
   	  
   	        		document.getElementById("tech" + technician_id).innerHTML = contentString;
   	        		//technicians[message.data.technicianId] = new google.maps.InfoWindow({content: contentString});
@@ -263,7 +287,7 @@ div#command{
   	        		console.log(technicians[technician_id].getTitle());		 
   	        	}
   	        	else{
-  	        		technicians[technician_id].setPosition({lat: message.data.latitude, lng: message.data.longitude});
+  	        		technicians[technician_id].setPosition({lat: latitude, lng: longitude});
   					document.getElementById("tech" + technician_id).innerHTML = contentString;
   				}
   			}
