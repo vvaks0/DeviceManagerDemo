@@ -259,6 +259,12 @@ div#command{
   					var technician_id = message.data.technicianId
   				}
   				
+  				if(message.data.status == null){
+  					var status = 'undefined'
+  				}else{
+  					var status = message.data.status
+  				}
+  				
   				if (typeof message.data.latitude === 'string' || message.data.latitude instanceof String){
   					var latitude = parseFloat(message.data.latitude)
   				}else{
@@ -274,7 +280,7 @@ div#command{
   				contentString = 'Technician Name: ' + technician_id + '<br>' +
 					'Latitude: ' + latitude + '<br>' + 
 					'Longitude: ' + longitude + '<br>' + 
-					'Status: ' + message.data.status + '<br>';
+					'Status: ' + status + '<br>';
   	        	if(!technicians[technician_id]){
   	        		technicians[technician_id] = new google.maps.Marker({position: {lat: lat, lng: lng}, map: map, icon: carIcon});
   	        		technicians[technician_id].setTitle(technician_id);
