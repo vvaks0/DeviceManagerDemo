@@ -189,63 +189,121 @@ div#command{
   		dojox.cometd.subscribe("/*", function(message){
   			if(message.channel == deviceChannel){
   				console.log(message);
-  				contentString = 'Serial Number: ' + message.data.deviceSerialNumber + '<br>' +
-  						'Device Model: ' + message.data.deviceModel + '<br>' + 
-  						'Device Status: ' + message.data.status + '<br>' +  
-  						'Signal Strength: ' + message.data.signalStrength + '<br>' + 
-  						'Internal Temp: ' + message.data.internalTemp + '<br>' +
-  						'Device State: ' + message.data.state;
+  				
+  				if(message.data.deviceSerialNumber == null){
+  					var serial_number = message.data.serial_number
+  				}else{
+  					var serial_number = message.data.deviceSerialNumber
+  				}
+  				
+  				if(message.data.deviceModel == null){
+  					var device_model = message.data.device_model
+  				}else{
+  					var device_model = message.data.deviceModel
+  				}
+  				
+  				if(message.data.signalStrength == null){
+  					var signal_strength = message.data.signal_strength
+  				}else{
+  					var signal_strength = message.data.signalStrength
+  				}
+  				
+  				if(message.data.internalTemp == null){
+  					var internal_temp = message.data.internal_temp
+  				}else{
+  					var internal_temp = message.data.internalTemp
+  				}
+  				
+  				contentString = 'Serial Number: ' + serial_number + '<br>' +
+  						'Device Model: ' + device_model + '<br>' + 
+  						//'Device Status: ' + message.data.status + '<br>' +  
+  						'Signal Strength: ' + signal_strength + '<br>' + 
+  						'Internal Temp: ' + internal_temp + '<br>' // +
+  						//'Device State: ' + message.data.state;
 
   						//if(alert[message.data.deviceSerialNumber] != null)
   							//contentString = contentString + alert[message.data.deviceSerialNumber];
 
-  						if(!markers[message.data.deviceSerialNumber]){
-  							markers[message.data.deviceSerialNumber] = new google.maps.Marker({position: {lat: message.data.latitude, lng: message.data.longitude}, map: map, icon: greenIcon}); 
-  							markers[message.data.deviceSerialNumber].setTitle(message.data.deviceSerialNumber);
-  							markerInfo[message.data.deviceSerialNumber] = new google.maps.InfoWindow({content: contentString});
-  							markerInfo[message.data.deviceSerialNumber].setContent(contentString);
-  							google.maps.event.addListener(markers[message.data.deviceSerialNumber], 'click', function() {markerInfo[message.data.deviceSerialNumber].open(map,markers[message.data.deviceSerialNumber]); } );  
-  							document.getElementById("device" + message.data.deviceSerialNumber).innerHTML = contentString;
-  							console.log(markers[message.data.deviceSerialNumber].getTitle());
+  						if(!markers[serial_number]){
+  							markers[serial_number] = new google.maps.Marker({position: {lat: message.data.latitude, lng: message.data.longitude}, map: map, icon: greenIcon}); 
+  							markers[serial_number].setTitle(serial_number);
+  							markerInfo[serial_number] = new google.maps.InfoWindow({content: contentString});
+  							markerInfo[serial_number].setContent(contentString);
+  							google.maps.event.addListener(markers[serial_number], 'click', function() {markerInfo[serial_number].open(map,markers[serial_number]); } );  
+  							document.getElementById("device" + serial_number).innerHTML = contentString;
+  							console.log(markers[serial_number].getTitle());
   						}
   						else{
-  							markerInfo[message.data.deviceSerialNumber].setContent(contentString);
-  							document.getElementById("device" + message.data.deviceSerialNumber).innerHTML = contentString;
+  							markerInfo[serial_number].setContent(contentString);
+  							document.getElementById("device" + serial_number).innerHTML = contentString;
   						}
   			}
   			else if(message.channel == technicianChannel){
   				console.log(message);
-  				contentString = 'Technician Name: ' + message.data.technicianId + '<br>' +
+  				
+  				if(message.data.technicianId == null){
+  					var technician_id = message.data.technician_id
+  				}else{
+  					var technician_id = message.data.technicianId
+  				}
+  				
+  				contentString = 'Technician Name: ' + technician_id + '<br>' +
 					'Latitude: ' + message.data.latitude + '<br>' + 
 					'Longitude: ' + message.data.longitude + '<br>' + 
 					'Status: ' + message.data.status + '<br>';
-  	        	if(!technicians[message.data.technicianId]){
-  	        		technicians[message.data.technicianId] = new google.maps.Marker({position: {lat: lat, lng: lng}, map: map, icon: carIcon});
-  	        		technicians[message.data.technicianId].setTitle(message.data.technicianId);
-  	        		technicians[message.data.technicianId].setPosition({lat: message.data.latitude, lng: message.data.longitude});
+  	        	if(!technicians[technician_id]){
+  	        		technicians[technician_id] = new google.maps.Marker({position: {lat: lat, lng: lng}, map: map, icon: carIcon});
+  	        		technicians[technician_id].setTitle(technician_id);
+  	        		technicians[technician_id].setPosition({lat: message.data.latitude, lng: message.data.longitude});
   	  
-  	        		document.getElementById("tech" + message.data.technicianId).innerHTML = contentString;
+  	        		document.getElementById("tech" + technician_id).innerHTML = contentString;
   	        		//technicians[message.data.technicianId] = new google.maps.InfoWindow({content: contentString});
   	        		//technicians[message.data.technicianId].setContent(contentString);
   	        		//google.maps.event.addListener(technicians[message.data.technicianId], 'click', function() {technicians[message.data.technicianId].open(map,technicians[message.data.technicianId]); } );  
-  	        		console.log(technicians[message.data.technicianId].getTitle());		 
+  	        		console.log(technicians[technician_id].getTitle());		 
   	        	}
   	        	else{
-  	        		technicians[message.data.technicianId].setPosition({lat: message.data.latitude, lng: message.data.longitude});
-  					document.getElementById("tech" + message.data.technicianId).innerHTML = contentString;
+  	        		technicians[technician_id].setPosition({lat: message.data.latitude, lng: message.data.longitude});
+  					document.getElementById("tech" + technician_id).innerHTML = contentString;
   				}
   			}
   			else if(message.channel == alertChannel){
-  				console.log("ALERT: " + message.data.deviceSerialNumber + " : " + message.data.alertDescription);
-  				markers[message.data.deviceSerialNumber].setIcon(redIcon);
-  				alert[message.data.deviceSerialNumber] = '<br><font color="red">ALERT: ' + message.data.alertDescription + '</font><br>';
-  				document.getElementById("deviceAlert" + message.data.deviceSerialNumber).innerHTML = '<br><font color="red">ALERT: ' + message.data.alertDescription + '</font><br>';
+  				
+  				if(message.data.deviceSerialNumber == null){
+  					var serial_number = message.data.serial_number
+  				}else{
+  					var serial_number = message.data.deviceSerialNumber
+  				}
+  				
+  				if(message.data.alertDescription == null){
+  					var alert_description = message.data.alert_description
+  				}else{
+  					var alert_description = message.data.alertDescription
+  				}
+  				
+  				console.log("ALERT: " + serial_number + " : " + alert_description);
+  				markers[serial_number].setIcon(redIcon);
+  				alert[serial_number] = '<br><font color="red">ALERT: ' + alert_description + '</font><br>';
+  				document.getElementById("deviceAlert" + serial_number).innerHTML = '<br><font color="red">ALERT: ' + alert_description + '</font><br>';
   			}
   			else if(message.channel == predictionChannel){
-  				console.log("WARNING: " + message.data.deviceSerialNumber + " : " + message.data.predictionDescription);
+  				
+  				if(message.data.deviceSerialNumber == null){
+  					var serial_number = message.data.serial_number
+  				}else{
+  					var serial_number = message.data.deviceSerialNumber
+  				}
+  				
+  				if(message.data.predictionDescription == null){
+  					var prediction_description = message.data.prediction_description
+  				}else{
+  					var prediction_description = message.data.predictionDescription
+  				}
+  				
+  				console.log("WARNING: " + message.data.serial_number + " : " + prediction_description);
   				//markers[message.data.deviceSerialNumber].setIcon(redIcon);
-  				alert[message.data.deviceSerialNumber] = '<br><font color="orange">WARNING: ' + message.data.predictionDescription + '</font><br>';
-  				document.getElementById("deviceAlert" + message.data.deviceSerialNumber).innerHTML = '<br><font color="orange">WARNING: ' + message.data.predictionDescription + '</font><br>';;
+  				alert[serial_number] = '<br><font color="orange">WARNING: ' + prediction_description + '</font><br>';
+  				document.getElementById("deviceAlert" + serial_number).innerHTML = '<br><font color="orange">WARNING: ' + prediction_description + '</font><br>';;
   			}
   		});
   	}
