@@ -12,8 +12,8 @@
         <DataField name="field_8" optype="continuous" dataType="double"/>
         <DataField name="field_9" optype="continuous" dataType="double"/>
         <DataField name="target" optype="categorical" dataType="string">
-        	<Value value="yes"/>
-        	<Value value="no"/>
+        	<Value value="fail"/>
+        	<Value value="normal"/>
     	</DataField>
     </DataDictionary>
     <RegressionModel modelName="linear SVM" functionName="classification" normalizationMethod="none" targetFieldName="target">
@@ -30,18 +30,18 @@
             <MiningField name="field_9" usageType="active"/>
             <MiningField name="target" usageType="predicted"/>
         </MiningSchema>
-        <RegressionTable intercept="0.0" targetCategory="1">
-            <NumericPredictor name="field_0" coefficient="-0.6468782693163828"/>
-            <NumericPredictor name="field_1" coefficient="-0.5135090401193881"/>
-            <NumericPredictor name="field_2" coefficient="-0.052686857870453775"/>
-            <NumericPredictor name="field_3" coefficient="-0.18120470255408783"/>
-            <NumericPredictor name="field_4" coefficient="0.14192969311543985"/>
-            <NumericPredictor name="field_5" coefficient="0.2738620081188322"/>
-            <NumericPredictor name="field_6" coefficient="0.31802816136278356"/>
-            <NumericPredictor name="field_7" coefficient="0.6102156073169349"/>
-            <NumericPredictor name="field_8" coefficient="1.0459237101859185"/>
-            <NumericPredictor name="field_9" coefficient="0.976513089485489"/>
+        <RegressionTable intercept="0.0" targetCategory="fail">
+            <NumericPredictor name="field_0" coefficient="-21.510696799488848"/>
+            <NumericPredictor name="field_1" coefficient="-15.931767665717283"/>
+            <NumericPredictor name="field_2" coefficient="-12.458261698017738"/>
+            <NumericPredictor name="field_3" coefficient="-0.4227015216251221"/>
+            <NumericPredictor name="field_4" coefficient="0.10321201357350375"/>
+            <NumericPredictor name="field_5" coefficient="2.7345487148441783"/>
+            <NumericPredictor name="field_6" coefficient="6.9098624045676935"/>
+            <NumericPredictor name="field_7" coefficient="2.523121885598148"/>
+            <NumericPredictor name="field_8" coefficient="12.874343529133112"/>
+            <NumericPredictor name="field_9" coefficient="21.82194972861996"/>
         </RegressionTable>
-        <RegressionTable intercept="1.185" targetCategory="0"/>
+        <RegressionTable intercept="0.0" targetCategory="normal"/>
     </RegressionModel>
 </PMML>
