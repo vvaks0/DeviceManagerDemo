@@ -324,16 +324,16 @@ div#command{
   					var serial_number = message.data.deviceSerialNumber
   				}
   				
-  				if(message.data.predictionDescription == null){
-  					var prediction_description = message.data.prediction_description
+  				if(message.data.alertDescription == null){
+  					var alert_description = message.data.alert_description
   				}else{
-  					var prediction_description = message.data.predictionDescription
+  					var alert_description = message.data.alertDescription
   				}
   				
-  				console.log("WARNING: " + message.data.serial_number + " : " + prediction_description);
+  				console.log("WARNING: " + serial_number + " : " + alert_description);
   				//markers[message.data.deviceSerialNumber].setIcon(redIcon);
-  				alert[serial_number] = '<br><font color="orange">WARNING: ' + prediction_description + '</font><br>';
-  				document.getElementById("deviceAlert" + serial_number).innerHTML = '<br><font color="orange">WARNING: ' + prediction_description + '</font><br>';;
+  				alert[serial_number] = '<br><font color="orange">WARNING: ' + alert_description + '</font><br>';
+  				document.getElementById("deviceAlert" + serial_number).innerHTML = '<br><font color="orange">WARNING: ' + alert_description + '</font><br>';;
   			}
   		});
   	}
