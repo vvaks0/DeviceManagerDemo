@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+ 
+<configuration>
+
+  <property require-input="true">
+    <name>democontrol.install.dir</name>
+    <value>/root</value>
+    <description>Directory under which demo control utility will be installed</description>
+  </property> 
+
+  <property require-input="true">
+    <name>democontrol.device.manager.git.url</name>
+    <value>https://github.com/vakshorton/DeviceManagerDemo.git</value>
+    <description>Online location to download Device Manager Application</description>
+  </property> 
+  
+  <property require-input="true">
+    <name>democontrol.sam.extentions.git.url</name>
+    <value>https://github.com/vakshorton/sam-custom-extentions.git</value>
+    <description>Online location to download SAM custom extentions</description>
+  </property>
+  
+  <property require-input="true">
+    <name>democontrol.simulator.git.url</name>
+    <value>https://github.com/vakshorton/DataSimulators.git</value>
+    <description>Online location to download Simulator package</description>
+  </property> 
+  
+  <property require-input="true">
+    <name>democontrol.google.api.key</name>
+    <value></value>
+    <property-type>PASSWORD</property-type>
+    <description>Google API Key used to enable Map in Device Manager UI</description>
+        <value-attributes>
+		<type>password</type>
+    </value-attributes>
+  </property>   
+</configuration>
