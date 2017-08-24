@@ -585,6 +585,69 @@ deploySAMTopology () {
     fi
 }
 
+pushSchemasToRegistry (){
+
+#technician_incoming
+PAYLOAD="{\"name\":\"technician_incoming\",\"type\":\"avro\",\"schemaGroup\":\"technician\",\"description\":\"technician_incoming\",\"evolve\":true,\"compatibility\":\"BACKWARD\"}"
+
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas
+	
+	PAYLOAD="{\"description\":\"technician status\",\"schemaText\":\"{\\n   \\\"type\\\" : \\\"record\\\",\\n   \\\"namespace\\\" : \\\"com.hortonworks\\\",\\n   \\\"name\\\" : \\\"technician_status\\\",\\n   \\\"fields\\\" : [\\n\\t  { \\\"name\\\" : \\\"technician_id\\\" , \\\"type\\\" : \\\"string\\\" },\\n      { \\\"name\\\" : \\\"longitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"latitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"status\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"ip_address\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"port\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"event_type\\\" , \\\"type\\\" : \\\"string\\\"}\\n\\t]\\n}\"}"
+
+	echo $PAYLOAD
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas/technician_incoming/versions
+	
+
+#technician_status
+		PAYLOAD="{\"name\":\"technician_status\",\"type\":\"avro\",\"schemaGroup\":\"technician\",\"description\":\"technician_status\",\"evolve\":true,\"compatibility\":\"BACKWARD\"}"
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas
+		
+	PAYLOAD="{\"description\":\"technician status\",\"schemaText\":\"{\\n   \\\"type\\\" : \\\"record\\\",\\n   \\\"namespace\\\" : \\\"com.hortonworks\\\",\\n   \\\"name\\\" : \\\"technician_status\\\",\\n   \\\"fields\\\" : [\\n\\t  { \\\"name\\\" : \\\"technician_id\\\" , \\\"type\\\" : \\\"string\\\" },\\n      { \\\"name\\\" : \\\"longitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"latitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"status\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"ip_address\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"port\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"event_type\\\" , \\\"type\\\" : \\\"string\\\"}\\n\\t]\\n}\"}"
+
+	echo $PAYLOAD
+
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas/technician_status/versions
+	
+#technician_destination
+	PAYLOAD="{\"name\":\"technician_destination\",\"type\":\"avro\",\"schemaGroup\":\"technician\",\"description\":\"technician_destination\",\"evolve\":true,\"compatibility\":\"BACKWARD\"}"
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas
+	
+	PAYLOAD="{\"description\":\"technician destination\",\"schemaText\":\"{\\n   \\\"type\\\" : \\\"record\\\",\\n   \\\"namespace\\\" : \\\"com.hortonworks\\\",\\n   \\\"name\\\" : \\\"technician_destination\\\",\\n   \\\"fields\\\" : [\\n\\t  { \\\"name\\\" : \\\"technician_id\\\" , \\\"type\\\" : \\\"string\\\" },\\n      { \\\"name\\\" : \\\"longitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"latitude\\\" , \\\"type\\\" : \\\"double\\\" },\\n      { \\\"name\\\" : \\\"status\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"ip_address\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"port\\\" , \\\"type\\\" : \\\"string\\\"},\\n      { \\\"name\\\" : \\\"event_type\\\" , \\\"type\\\": [\\\"null\\\", \\\"string\\\"]},\\n      { \\\"name\\\" : \\\"destination_longitude\\\" , \\\"type\\\" : \\\"double\\\"},\\n      { \\\"name\\\" : \\\"destination_latitude\\\" , \\\"type\\\" : \\\"double\\\"}\\n\\t]\\n}\"}"
+
+	echo $PAYLOAD
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas/technician_destination/versions
+
+#stb_incoming
+	
+PAYLOAD="{\"name\":\"stb_incoming\",\"type\":\"avro\",\"schemaGroup\":\"device\",\"description\":\"stb_incoming\",\"evolve\":true,\"compatibility\":\"BACKWARD\"}"
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d $PAYLOAD -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas
+	
+	PAYLOAD="{\"description\":\"stb incoming\",\"schemaText\":\"{\\n \\\"type\\\": \\\"record\\\",\\n \\\"namespace\\\": \\\"com.hortonworks\\\",\\n \\\"name\\\": \\\"stb_incoming\\\",\\n \\\"fields\\\": [\\n  {\\n   \\\"name\\\": \\\"serialNumber\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"state\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"status\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"signalStrength\\\",\\n   \\\"type\\\": \\\"int\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"internalTemp\\\",\\n   \\\"type\\\": \\\"int\\\"\\n  }\\n ]\\n}\"}"
+
+	echo $PAYLOAD
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas/stb_incoming/versions
+	
+#stb_status	
+
+PAYLOAD="{\"name\":\"stb_status\",\"type\":\"avro\",\"schemaGroup\":\"device\",\"description\":\"stb_status\",\"evolve\":true,\"compatibility\":\"BACKWARD\"}"
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas
+	
+	PAYLOAD="{\"description\":\"set top box status\",\"schemaText\":\"{\\n \\\"type\\\": \\\"record\\\",\\n \\\"namespace\\\": \\\"com.hortonworks\\\",\\n \\\"name\\\": \\\"stb_details\\\",\\n \\\"fields\\\": [\\n  {\\n   \\\"name\\\": \\\"serial_number\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"state\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"status\\\",\\n   \\\"type\\\": \\\"string\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"signal_strength\\\",\\n   \\\"type\\\": \\\"int\\\"\\n  },\\n  {\\n   \\\"name\\\": \\\"internal_temp\\\",\\n   \\\"type\\\": \\\"int\\\"\\n  }\\n ]\\n}\"}"
+
+	echo $PAYLOAD
+	
+	curl -u admin:admin -i -H "content-type: application/json" -d "$PAYLOAD" -X POST http://$AMBARI_HOST:7788/api/v1/schemaregistry/schemas/stb_status/versions
+
+	
+}
+
 deployContainers (){
 	APP_DIR=$1
 	#cd APP_DIR/Cometd
@@ -683,6 +746,8 @@ echo "********************************* Creating Kafka Topics"
 createKafkaTopics
 echo "********************************* Deploying UI and HTTP Pub/Sub containers"
 deployContainers $ROOT_PATH/DeviceManagerDemo
+echo "********************************* Registering Schemas"
+pushSchemasToRegistry
 echo "********************************* Deploying Nifi Template"
 deployTemplateToNifi $ROOT_PATH/DeviceManagerDemo/Nifi/template
 echo "********************************* Configuring Nifi Template"
