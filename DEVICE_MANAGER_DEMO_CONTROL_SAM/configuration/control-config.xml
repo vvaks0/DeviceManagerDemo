@@ -17,7 +17,7 @@
   
   <property require-input="true">
     <name>democontrol.sam.extentions.git.url</name>
-    <value>https://github.com/vakshorton/sam-custom-extentions.git</value>
+    <value>https://github.com/vakshorton/sam-custom-extensions.git</value>
     <description>Online location to download SAM custom extentions</description>
   </property>
   

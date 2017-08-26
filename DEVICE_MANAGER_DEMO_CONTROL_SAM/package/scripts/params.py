@@ -11,6 +11,6 @@ device_manager_download_url = config['configurations']['control-config']['democo
 sam_extentions_download_url = config['configurations']['control-config']['democontrol.sam.extentions.git.url']
 google_api_key = config['configurations']['control-config']['democontrol.google.api.key']
 
-nifi_host = str(master_configs['nifi_master_hosts'][0])
+nifi_host = str(config['clusterHostInfo']['nifi_master_hosts'][0])
 nifi_port = '9090'
 
